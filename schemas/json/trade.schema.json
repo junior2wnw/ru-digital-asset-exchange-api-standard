@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://standard.spreadx.org/schemas/trade.schema.json",
+  "title": "Trade",
+  "type": "object",
+  "required": [
+    "trade_id",
+    "instrument_id",
+    "exchange_order_id",
+    "side",
+    "price",
+    "quantity",
+    "quote_quantity",
+    "fee",
+    "liquidity_role",
+    "trade_time"
+  ],
+  "properties": {
+    "trade_id": { "type": "string" },
+    "instrument_id": { "type": "string" },
+    "exchange_order_id": { "type": "string" },
+    "client_order_id": { "type": "string" },
+    "side": { "type": "string", "enum": ["buy", "sell"] },
+    "price": { "$ref": "#/$defs/decimal" },
+    "quantity": { "$ref": "#/$defs/decimal" },
+    "quote_quantity": { "$ref": "#/$defs/decimal" },
+    "fee": {
+      "type": "object",
+      "required": ["asset_id", "amount"],
+      "properties": {
+        "asset_id": { "type": "string" },
+        "amount": { "$ref": "#/$defs/decimal" }
+      },
+      "additionalProperties": false
+    },
+    "liquidity_role": {
+      "type": "string",
+      "enum": ["maker", "taker", "auction", "liquidation", "settlement"]
+    },
+    "trade_time": { "type": "string", "format": "date-time" },
+    "settlement_time": { "type": "string", "format": "date-time" },
+    "extensions": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "decimal": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+    }
+  }
+}
+

@@ -1,0 +1,17 @@
+{
+  "name": "@spreadx/sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK reference implementation for the RU Digital Asset Exchange API Standard.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}
+

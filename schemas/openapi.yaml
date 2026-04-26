@@ -1,0 +1,664 @@
+openapi: 3.1.0
+info:
+  title: RU Digital Asset Exchange API Standard
+  version: 0.1.0
+  summary: Open REST API profile for regulated digital asset exchanges.
+  license:
+    name: Apache-2.0
+servers:
+  - url: https://api.example.com
+    description: Production
+  - url: https://sandbox.example.com
+    description: Sandbox
+tags:
+  - name: discovery
+  - name: market
+  - name: trading
+  - name: account
+  - name: wallet
+  - name: reference
+paths:
+  /v1/time:
+    get:
+      tags: [discovery]
+      summary: Get server time.
+      operationId: getTime
+      responses:
+        "200":
+          description: Server time.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [server_time]
+                properties:
+                  server_time:
+                    type: string
+                    format: date-time
+  /v1/instruments:
+    get:
+      tags: [discovery, market]
+      summary: List instruments.
+      operationId: listInstruments
+      parameters:
+        - $ref: "#/components/parameters/InstrumentType"
+      responses:
+        "200":
+          description: Instruments.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "./json/instrument.schema.json"
+  /v1/instruments/{instrument_id}:
+    get:
+      tags: [discovery, market]
+      summary: Get instrument details.
+      operationId: getInstrument
+      parameters:
+        - $ref: "#/components/parameters/InstrumentId"
+      responses:
+        "200":
+          description: Instrument.
+          content:
+            application/json:
+              schema:
+                $ref: "./json/instrument.schema.json"
+        "404":
+          $ref: "#/components/responses/Error"
+  /v1/market/orderbook:
+    get:
+      tags: [market]
+      summary: Get order book snapshot.
+      operationId: getOrderBook
+      parameters:
+        - $ref: "#/components/parameters/InstrumentIdQuery"
+        - name: depth
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 50
+      responses:
+        "200":
+          description: Order book snapshot.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [instrument_id, sequence, bids, asks, event_time]
+                properties:
+                  instrument_id:
+                    type: string
+                  sequence:
+                    type: integer
+                  bids:
+                    $ref: "#/components/schemas/PriceLevels"
+                  asks:
+                    $ref: "#/components/schemas/PriceLevels"
+                  event_time:
+                    type: string
+                    format: date-time
+  /v1/market/trades:
+    get:
+      tags: [market]
+      summary: Get recent public trades.
+      operationId: getPublicTrades
+      parameters:
+        - $ref: "#/components/parameters/InstrumentIdQuery"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Trades.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "./json/trade.schema.json"
+  /v1/market/candles:
+    get:
+      tags: [market]
+      summary: Get OHLCV candles.
+      operationId: getCandles
+      parameters:
+        - $ref: "#/components/parameters/InstrumentIdQuery"
+        - name: interval
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [1m, 5m, 15m, 1h, 4h, 1d]
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Candles.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Candle"
+  /v1/account/balances:
+    get:
+      tags: [account]
+      security:
+        - ApiKeyAuth: []
+      summary: List balances.
+      operationId: listBalances
+      responses:
+        "200":
+          description: Balances.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "./json/balance.schema.json"
+  /v1/account/positions:
+    get:
+      tags: [account]
+      security:
+        - ApiKeyAuth: []
+      summary: List derivative positions.
+      operationId: listPositions
+      responses:
+        "200":
+          description: Positions.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "./json/position.schema.json"
+  /v1/orders:
+    get:
+      tags: [trading]
+      security:
+        - ApiKeyAuth: []
+      summary: List orders.
+      operationId: listOrders
+      parameters:
+        - $ref: "#/components/parameters/InstrumentIdQueryOptional"
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Orders.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "./json/order.schema.json"
+    post:
+      tags: [trading]
+      security:
+        - ApiKeyAuth: []
+      summary: Create order.
+      operationId: createOrder
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderRequest"
+      responses:
+        "201":
+          description: Created order.
+          content:
+            application/json:
+              schema:
+                $ref: "./json/order.schema.json"
+        "400":
+          $ref: "#/components/responses/Error"
+        "422":
+          $ref: "#/components/responses/Error"
+  /v1/orders/{order_id}:
+    delete:
+      tags: [trading]
+      security:
+        - ApiKeyAuth: []
+      summary: Cancel order.
+      operationId: cancelOrder
+      parameters:
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/IdempotencyKey"
+      responses:
+        "200":
+          description: Cancelled order.
+          content:
+            application/json:
+              schema:
+                $ref: "./json/order.schema.json"
+  /v1/trades:
+    get:
+      tags: [trading]
+      security:
+        - ApiKeyAuth: []
+      summary: List private trades.
+      operationId: listPrivateTrades
+      parameters:
+        - $ref: "#/components/parameters/InstrumentIdQueryOptional"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Trades.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "./json/trade.schema.json"
+  /v1/wallet/assets:
+    get:
+      tags: [wallet]
+      security:
+        - ApiKeyAuth: []
+      summary: List wallet assets and networks.
+      operationId: listWalletAssets
+      responses:
+        "200":
+          description: Wallet assets.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/WalletAsset"
+  /v1/wallet/deposit-addresses:
+    post:
+      tags: [wallet]
+      security:
+        - ApiKeyAuth: []
+      summary: Create or get deposit address.
+      operationId: createDepositAddress
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [asset_id, network_id]
+              properties:
+                asset_id:
+                  type: string
+                network_id:
+                  type: string
+      responses:
+        "200":
+          description: Deposit address.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DepositAddress"
+  /v1/wallet/deposits:
+    get:
+      tags: [wallet]
+      security:
+        - ApiKeyAuth: []
+      summary: List deposits.
+      operationId: listDeposits
+      responses:
+        "200":
+          description: Deposits.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "./json/wallet_transaction.schema.json"
+  /v1/wallet/withdrawals:
+    get:
+      tags: [wallet]
+      security:
+        - ApiKeyAuth: []
+      summary: List withdrawals.
+      operationId: listWithdrawals
+      responses:
+        "200":
+          description: Withdrawals.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "./json/wallet_transaction.schema.json"
+    post:
+      tags: [wallet]
+      security:
+        - ApiKeyAuth: []
+      summary: Create withdrawal.
+      operationId: createWithdrawal
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWithdrawalRequest"
+      responses:
+        "201":
+          description: Withdrawal.
+          content:
+            application/json:
+              schema:
+                $ref: "./json/wallet_transaction.schema.json"
+  /v1/transfers:
+    post:
+      tags: [wallet]
+      security:
+        - ApiKeyAuth: []
+      summary: Create internal transfer.
+      operationId: createTransfer
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTransferRequest"
+      responses:
+        "201":
+          description: Transfer.
+          content:
+            application/json:
+              schema:
+                $ref: "./json/wallet_transaction.schema.json"
+  /v1/fees:
+    get:
+      tags: [reference]
+      summary: List fee schedules.
+      operationId: listFees
+      responses:
+        "200":
+          description: Fee schedules.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/FeeSchedule"
+  /v1/limits:
+    get:
+      tags: [reference]
+      summary: List limits.
+      operationId: listLimits
+      responses:
+        "200":
+          description: Limits.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Limit"
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  parameters:
+    InstrumentId:
+      name: instrument_id
+      in: path
+      required: true
+      schema:
+        type: string
+    InstrumentIdQuery:
+      name: instrument_id
+      in: query
+      required: true
+      schema:
+        type: string
+    InstrumentIdQueryOptional:
+      name: instrument_id
+      in: query
+      required: false
+      schema:
+        type: string
+    InstrumentType:
+      name: type
+      in: query
+      required: false
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 100
+    IdempotencyKey:
+      name: X-Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 128
+  responses:
+    Error:
+      description: Standard error.
+      content:
+        application/json:
+          schema:
+            $ref: "./json/error.schema.json"
+  schemas:
+    DecimalString:
+      type: string
+      pattern: "^-?[0-9]+(\\.[0-9]+)?$"
+    PriceLevel:
+      type: object
+      required: [price, quantity]
+      properties:
+        price:
+          $ref: "#/components/schemas/DecimalString"
+        quantity:
+          $ref: "#/components/schemas/DecimalString"
+    PriceLevels:
+      type: array
+      items:
+        $ref: "#/components/schemas/PriceLevel"
+    Candle:
+      type: object
+      required: [open_time, close_time, open, high, low, close, volume]
+      properties:
+        open_time:
+          type: string
+          format: date-time
+        close_time:
+          type: string
+          format: date-time
+        open:
+          $ref: "#/components/schemas/DecimalString"
+        high:
+          $ref: "#/components/schemas/DecimalString"
+        low:
+          $ref: "#/components/schemas/DecimalString"
+        close:
+          $ref: "#/components/schemas/DecimalString"
+        volume:
+          $ref: "#/components/schemas/DecimalString"
+    CreateOrderRequest:
+      type: object
+      required: [instrument_id, side, type, quantity]
+      properties:
+        instrument_id:
+          type: string
+        side:
+          type: string
+          enum: [buy, sell]
+        type:
+          type: string
+          enum: [market, limit, stop_market, stop_limit, take_profit_market, take_profit_limit]
+        quantity:
+          $ref: "#/components/schemas/DecimalString"
+        price:
+          $ref: "#/components/schemas/DecimalString"
+        time_in_force:
+          type: string
+          enum: [gtc, ioc, fok, gtd, post_only]
+          default: gtc
+        client_order_id:
+          type: string
+        position_intent:
+          type: string
+          enum: [open, close, reduce_only, close_position]
+    CreateWithdrawalRequest:
+      type: object
+      required: [asset_id, network_id, amount, address]
+      properties:
+        asset_id:
+          type: string
+        network_id:
+          type: string
+        amount:
+          $ref: "#/components/schemas/DecimalString"
+        address:
+          type: string
+        memo:
+          type: string
+        travel_rule:
+          type: object
+          additionalProperties: true
+    CreateTransferRequest:
+      type: object
+      required: [asset_id, amount, from_account_id, to_account_id]
+      properties:
+        asset_id:
+          type: string
+        amount:
+          $ref: "#/components/schemas/DecimalString"
+        from_account_id:
+          type: string
+        to_account_id:
+          type: string
+        transfer_type:
+          type: string
+    WalletAsset:
+      type: object
+      required: [asset_id, networks]
+      properties:
+        asset_id:
+          type: string
+        networks:
+          type: array
+          items:
+            type: object
+            required: [network_id, deposit_enabled, withdrawal_enabled]
+            properties:
+              network_id:
+                type: string
+              deposit_enabled:
+                type: boolean
+              withdrawal_enabled:
+                type: boolean
+              min_confirmations:
+                type: integer
+              withdrawal_fee:
+                $ref: "#/components/schemas/DecimalString"
+    DepositAddress:
+      type: object
+      required: [asset_id, network_id, address]
+      properties:
+        asset_id:
+          type: string
+        network_id:
+          type: string
+        address:
+          type: string
+        memo:
+          type: string
+    FeeSchedule:
+      type: object
+      required: [fee_schedule_id, maker_fee, taker_fee]
+      properties:
+        fee_schedule_id:
+          type: string
+        maker_fee:
+          $ref: "#/components/schemas/DecimalString"
+        taker_fee:
+          $ref: "#/components/schemas/DecimalString"
+    Limit:
+      type: object
+      required: [limit_id, scope, value]
+      properties:
+        limit_id:
+          type: string
+        scope:
+          type: string
+        value:
+          $ref: "#/components/schemas/DecimalString"
+        used:
+          $ref: "#/components/schemas/DecimalString"
+        reset_time:
+          type: string
+          format: date-time
+

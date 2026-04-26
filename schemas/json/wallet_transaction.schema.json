@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://standard.spreadx.org/schemas/wallet_transaction.schema.json",
+  "title": "WalletTransaction",
+  "type": "object",
+  "required": [
+    "wallet_transaction_id",
+    "type",
+    "asset_id",
+    "amount",
+    "status",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "wallet_transaction_id": { "type": "string" },
+    "type": { "type": "string", "enum": ["deposit", "withdrawal", "transfer"] },
+    "asset_id": { "type": "string" },
+    "network_id": { "type": "string" },
+    "amount": { "$ref": "#/$defs/decimal" },
+    "fee": { "$ref": "#/$defs/decimal" },
+    "address": { "type": "string" },
+    "memo": { "type": "string" },
+    "tx_hash": { "type": "string" },
+    "confirmations": { "type": "integer", "minimum": 0 },
+    "from_account_id": { "type": "string" },
+    "to_account_id": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": [
+        "address_created",
+        "pending",
+        "confirming",
+        "credited",
+        "created",
+        "compliance_review",
+        "approved",
+        "broadcasting",
+        "broadcasted",
+        "completed",
+        "cancelled",
+        "rejected",
+        "returned",
+        "failed"
+      ]
+    },
+    "travel_rule": { "type": "object", "additionalProperties": true },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "extensions": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "decimal": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+    }
+  }
+}
+

@@ -1,0 +1,168 @@
+{
+  "info": {
+    "name": "RU Digital Asset Exchange API Standard",
+    "description": "Reference Postman collection for the RU-DAX / SpreadX unified crypto market API draft.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8080"
+    },
+    {
+      "key": "instrumentId",
+      "value": "BTC-RUB-SPOT"
+    },
+    {
+      "key": "apiKey",
+      "value": "sandbox-key"
+    },
+    {
+      "key": "idempotencyKey",
+      "value": "demo-{{$timestamp}}"
+    }
+  ],
+  "item": [
+    {
+      "name": "Discovery",
+      "item": [
+        {
+          "name": "Server Time",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/v1/time"
+          }
+        },
+        {
+          "name": "Instruments",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/v1/instruments"
+          }
+        },
+        {
+          "name": "Instrument",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/v1/instruments/{{instrumentId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Market Data",
+      "item": [
+        {
+          "name": "Order Book",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/v1/market/orderbook?instrument_id={{instrumentId}}&depth=50"
+          }
+        },
+        {
+          "name": "Public Trades",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/v1/market/trades?instrument_id={{instrumentId}}&limit=50"
+          }
+        },
+        {
+          "name": "Candles",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/v1/market/candles?instrument_id={{instrumentId}}&interval=1m&limit=50"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Trading",
+      "item": [
+        {
+          "name": "Balances",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-Key", "value": "{{apiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/account/balances"
+          }
+        },
+        {
+          "name": "Create Limit Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-API-Key", "value": "{{apiKey}}" },
+              { "key": "X-Idempotency-Key", "value": "{{idempotencyKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"instrument_id\": \"{{instrumentId}}\",\n  \"side\": \"buy\",\n  \"type\": \"limit\",\n  \"quantity\": \"0.01\",\n  \"price\": \"5000000\",\n  \"time_in_force\": \"gtc\",\n  \"client_order_id\": \"postman-{{$timestamp}}\"\n}"
+            },
+            "url": "{{baseUrl}}/v1/orders"
+          }
+        },
+        {
+          "name": "List Orders",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-Key", "value": "{{apiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/orders"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wallet",
+      "item": [
+        {
+          "name": "Wallet Assets",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-Key", "value": "{{apiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/wallet/assets"
+          }
+        },
+        {
+          "name": "Create Deposit Address",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-API-Key", "value": "{{apiKey}}" },
+              { "key": "X-Idempotency-Key", "value": "{{idempotencyKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asset_id\": \"USDT\",\n  \"network_id\": \"TRON\"\n}"
+            },
+            "url": "{{baseUrl}}/v1/wallet/deposit-addresses"
+          }
+        },
+        {
+          "name": "Create Withdrawal",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-API-Key", "value": "{{apiKey}}" },
+              { "key": "X-Idempotency-Key", "value": "{{idempotencyKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"asset_id\": \"USDT\",\n  \"network_id\": \"TRON\",\n  \"amount\": \"10\",\n  \"address\": \"TXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\"\n}"
+            },
+            "url": "{{baseUrl}}/v1/wallet/withdrawals"
+          }
+        }
+      ]
+    }
+  ]
+}
+

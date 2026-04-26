@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://standard.spreadx.org/schemas/position.schema.json",
+  "title": "Position",
+  "type": "object",
+  "required": [
+    "instrument_id",
+    "side",
+    "quantity",
+    "entry_price",
+    "mark_price",
+    "unrealized_pnl",
+    "realized_pnl",
+    "initial_margin",
+    "maintenance_margin",
+    "leverage",
+    "margin_mode"
+  ],
+  "properties": {
+    "instrument_id": { "type": "string" },
+    "side": { "type": "string", "enum": ["long", "short", "flat"] },
+    "quantity": { "$ref": "#/$defs/decimal" },
+    "entry_price": { "$ref": "#/$defs/decimal" },
+    "mark_price": { "$ref": "#/$defs/decimal" },
+    "liquidation_price": { "$ref": "#/$defs/decimal" },
+    "unrealized_pnl": { "$ref": "#/$defs/decimal" },
+    "realized_pnl": { "$ref": "#/$defs/decimal" },
+    "initial_margin": { "$ref": "#/$defs/decimal" },
+    "maintenance_margin": { "$ref": "#/$defs/decimal" },
+    "leverage": { "$ref": "#/$defs/decimal" },
+    "margin_mode": { "type": "string", "enum": ["isolated", "cross", "portfolio"] },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "extensions": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "decimal": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+    }
+  }
+}
+

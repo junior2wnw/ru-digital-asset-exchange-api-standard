@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate JSON files
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          for path in Path(".").rglob("*.json"):
+              json.loads(path.read_text(encoding="utf-8"))
+              print(path)
+          PY
+      - name: Typecheck TypeScript SDK
+        working-directory: sdks/typescript
+        run: npm install && npm run typecheck
+      - name: Install Python SDKs and conformance tests
+        run: |
+          python -m pip install -U pip
+          python -m pip install ./sdks/python ./mock-exchange ./tests/conformance
+      - name: Start mock exchange
+        run: |
+          uvicorn spreadx_mock.app:app --host 127.0.0.1 --port 8080 &
+          sleep 3
+      - name: Run conformance tests
+        run: pytest tests/conformance --base-url http://127.0.0.1:8080 --api-key sandbox-key
+

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://standard.spreadx.org/schemas/order.schema.json",
+  "title": "Order",
+  "type": "object",
+  "required": [
+    "exchange_order_id",
+    "instrument_id",
+    "side",
+    "type",
+    "status",
+    "quantity",
+    "filled_quantity",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "exchange_order_id": { "type": "string" },
+    "client_order_id": { "type": "string" },
+    "instrument_id": { "type": "string" },
+    "side": { "type": "string", "enum": ["buy", "sell"] },
+    "type": {
+      "type": "string",
+      "enum": ["market", "limit", "stop_market", "stop_limit", "take_profit_market", "take_profit_limit"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["accepted", "open", "partially_filled", "filled", "cancel_pending", "cancelled", "expired", "rejected"]
+    },
+    "time_in_force": { "type": "string", "enum": ["gtc", "ioc", "fok", "gtd", "post_only"] },
+    "position_intent": { "type": "string", "enum": ["open", "close", "reduce_only", "close_position"] },
+    "quantity": { "$ref": "#/$defs/decimal" },
+    "filled_quantity": { "$ref": "#/$defs/decimal" },
+    "price": { "$ref": "#/$defs/decimal" },
+    "average_price": { "$ref": "#/$defs/decimal" },
+    "fee": {
+      "type": "object",
+      "required": ["asset_id", "amount"],
+      "properties": {
+        "asset_id": { "type": "string" },
+        "amount": { "$ref": "#/$defs/decimal" }
+      },
+      "additionalProperties": false
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "extensions": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "decimal": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+    }
+  }
+}
+

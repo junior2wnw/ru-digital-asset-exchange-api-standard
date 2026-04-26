@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://standard.spreadx.org/schemas/instrument.schema.json",
+  "title": "Instrument",
+  "type": "object",
+  "required": [
+    "instrument_id",
+    "symbol",
+    "type",
+    "base_asset",
+    "quote_asset",
+    "status",
+    "price_tick",
+    "quantity_step",
+    "min_quantity",
+    "max_quantity",
+    "min_notional",
+    "fee_schedule_id",
+    "risk_profile_id"
+  ],
+  "properties": {
+    "instrument_id": { "type": "string", "minLength": 1 },
+    "symbol": { "type": "string", "minLength": 1 },
+    "type": {
+      "type": "string",
+      "enum": [
+        "spot",
+        "margin_spot",
+        "perpetual_future",
+        "dated_future",
+        "option",
+        "swap",
+        "index",
+        "structured_product"
+      ]
+    },
+    "base_asset": { "type": "string", "minLength": 1 },
+    "quote_asset": { "type": "string", "minLength": 1 },
+    "status": {
+      "type": "string",
+      "enum": ["online", "post_only", "cancel_only", "halted", "settlement_only", "delisted"]
+    },
+    "price_tick": { "$ref": "#/$defs/decimal" },
+    "quantity_step": { "$ref": "#/$defs/decimal" },
+    "min_quantity": { "$ref": "#/$defs/decimal" },
+    "max_quantity": { "$ref": "#/$defs/decimal" },
+    "min_notional": { "$ref": "#/$defs/decimal" },
+    "fee_schedule_id": { "type": "string" },
+    "risk_profile_id": { "type": "string" },
+    "underlying": { "type": "string" },
+    "settlement_asset": { "type": "string" },
+    "margin_asset": { "type": "string" },
+    "contract_size": { "$ref": "#/$defs/decimal" },
+    "expiry_time": { "type": "string", "format": "date-time" },
+    "strike_price": { "$ref": "#/$defs/decimal" },
+    "option_type": { "type": "string", "enum": ["call", "put"] },
+    "funding_interval": { "type": "string" },
+    "settlement_method": { "type": "string", "enum": ["cash", "physical", "hybrid"] },
+    "extensions": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "decimal": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+    }
+  }
+}
+

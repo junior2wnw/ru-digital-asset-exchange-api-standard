@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://standard.spreadx.org/schemas/balance.schema.json",
+  "title": "Balance",
+  "type": "object",
+  "required": ["asset_id", "available", "reserved", "locked", "total", "credit", "debt"],
+  "properties": {
+    "asset_id": { "type": "string" },
+    "available": { "$ref": "#/$defs/decimal" },
+    "reserved": { "$ref": "#/$defs/decimal" },
+    "locked": { "$ref": "#/$defs/decimal" },
+    "total": { "$ref": "#/$defs/decimal" },
+    "credit": { "$ref": "#/$defs/decimal" },
+    "debt": { "$ref": "#/$defs/decimal" },
+    "updated_at": { "type": "string", "format": "date-time" },
+    "extensions": { "type": "object", "additionalProperties": true }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "decimal": {
+      "type": "string",
+      "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+    }
+  }
+}
+
