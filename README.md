@@ -27,6 +27,7 @@ Draft открытого API-профиля для совместимой инф
 | `mock-exchange/` | Reference mock exchange для sandbox и локальных тестов |
 | `tests/conformance/` | Conformance test suite для проверки совместимости |
 | `postman/` | Postman collection для ручной проверки |
+| `submissions/` | Пакет обращений, приложение и DOCX/HTML для подачи предложения |
 | `docs/GITHUB_ACTIONS_CI.example.yml` | Шаблон CI для включения после выдачи GitHub `workflow` scope |
 
 ## Как Это Называть
