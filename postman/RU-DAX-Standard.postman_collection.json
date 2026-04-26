@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "RU Digital Asset Exchange API Standard",
-    "description": "Reference Postman collection for the RU-DAX / SpreadX unified crypto market API draft.",
+    "description": "Reference Postman collection for the RU-DAX interoperability profile draft.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -165,4 +165,3 @@
     }
   ]
 }
-

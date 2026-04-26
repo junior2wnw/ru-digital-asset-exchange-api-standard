@@ -1,6 +1,6 @@
 # SpreadX TypeScript SDK
 
-Reference TypeScript SDK for the RU Digital Asset Exchange API Standard.
+Reference TypeScript SDK for the RU-DAX interoperability profile draft.
 
 ```ts
 import { SpreadXClient } from "@spreadx/sdk";
@@ -15,4 +15,3 @@ console.log(await client.instruments());
 ```
 
 The SDK is intentionally tiny and readable. It uses the native `fetch` API and mirrors the REST profile directly.
-

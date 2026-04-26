@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "spreadx-conformance"
 version = "0.1.0"
-description = "Conformance tests for the RU Digital Asset Exchange API Standard."
+description = "Conformance tests for the RU-DAX interoperability profile draft."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
@@ -16,4 +16,3 @@ dependencies = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["spreadx_conformance"]
-

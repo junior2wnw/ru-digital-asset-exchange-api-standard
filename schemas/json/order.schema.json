@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://standard.spreadx.org/schemas/order.schema.json",
+  "$id": "urn:ru-dax:schema:order:0.1",
   "title": "Order",
   "type": "object",
   "required": [
@@ -54,4 +54,3 @@
     }
   }
 }
-

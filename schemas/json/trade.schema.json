@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://standard.spreadx.org/schemas/trade.schema.json",
+  "$id": "urn:ru-dax:schema:trade:0.1",
   "title": "Trade",
   "type": "object",
   "required": [
@@ -49,4 +49,3 @@
     }
   }
 }
-

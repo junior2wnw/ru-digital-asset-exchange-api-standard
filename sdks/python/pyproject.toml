@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "spreadx"
 version = "0.1.0"
-description = "Python SDK reference implementation for the RU Digital Asset Exchange API Standard."
+description = "Python reference client for the RU-DAX interoperability profile draft."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
@@ -22,4 +22,3 @@ Specification = "https://github.com/junior2wnw/ru-digital-asset-exchange-api-sta
 
 [tool.hatch.build.targets.wheel]
 packages = ["spreadx"]
-

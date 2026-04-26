@@ -1,6 +1,6 @@
 # SpreadX Mock Exchange
 
-Reference sandbox implementation for the RU Digital Asset Exchange API Standard.
+Reference sandbox implementation for the RU-DAX interoperability profile draft.
 
 Run locally:
 

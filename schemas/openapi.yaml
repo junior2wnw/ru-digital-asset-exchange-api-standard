@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: RU Digital Asset Exchange API Standard
   version: 0.1.0
-  summary: Open REST API profile for regulated digital asset exchanges.
+  summary: Draft REST API profile for interoperable digital asset market infrastructure.
   license:
     name: Apache-2.0
 servers:
@@ -661,4 +661,3 @@ components:
         reset_time:
           type: string
           format: date-time
-

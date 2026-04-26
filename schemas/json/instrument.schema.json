@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://standard.spreadx.org/schemas/instrument.schema.json",
+  "$id": "urn:ru-dax:schema:instrument:0.1",
   "title": "Instrument",
   "type": "object",
   "required": [
@@ -66,4 +66,3 @@
     }
   }
 }
-

@@ -1,6 +1,6 @@
 # Conformance Tests
 
-The conformance suite checks that an exchange behaves like the RU Digital Asset Exchange API Standard.
+The conformance suite checks that a venue behaves like the RU-DAX interoperability profile draft.
 
 Run against the local mock exchange:
 
@@ -17,4 +17,3 @@ Levels:
 - L4: derivatives data surface.
 
 The suite is intentionally small in Draft 0.1. Future versions should add WebSocket tests, FIX certification helpers, JSON Schema validation, load tests, and negative-path risk checks.
-

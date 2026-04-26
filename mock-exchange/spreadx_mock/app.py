@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 app = FastAPI(
     title="SpreadX Mock Exchange",
     version="0.1.0",
-    description="Reference mock exchange for the RU Digital Asset Exchange API Standard.",
+    description="Reference mock exchange for the RU-DAX interoperability profile draft.",
 )
 
 

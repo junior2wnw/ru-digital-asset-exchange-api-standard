@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://standard.spreadx.org/schemas/wallet_transaction.schema.json",
+  "$id": "urn:ru-dax:schema:wallet-transaction:0.1",
   "title": "WalletTransaction",
   "type": "object",
   "required": [
@@ -57,4 +57,3 @@
     }
   }
 }
-

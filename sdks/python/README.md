@@ -1,6 +1,6 @@
 # SpreadX Python SDK
 
-Reference Python SDK for the RU Digital Asset Exchange API Standard.
+Reference Python SDK for the RU-DAX interoperability profile draft.
 
 ```python
 from spreadx import Client
@@ -18,4 +18,3 @@ print(client.create_order(
 ```
 
 The SDK intentionally stays small. It is a readable reference client for implementers and can grow into a production client without changing the public model.
-
