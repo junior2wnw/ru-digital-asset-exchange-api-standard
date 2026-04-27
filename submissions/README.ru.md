@@ -76,6 +76,10 @@ PDF лучше делать вручную из DOCX или HTML после ви
 
 `source-check.ru.md`
 
+Если нужен маршрут без регистрации:
+
+`no-registration-route.ru.md`
+
 ## Пересборка DOCX/HTML
 
 ```powershell
