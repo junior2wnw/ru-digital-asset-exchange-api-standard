@@ -40,11 +40,13 @@ Vendor-specific расширения допустимы только через 
 
 Площадка может заявлять уровень:
 
-- `RU-DAX L0`;
-- `RU-DAX L1`;
-- `RU-DAX L2`;
-- `RU-DAX L3`;
-- `RU-DAX L4`;
-- `RU-DAX L5`.
+- `RU-DMIP L0`;
+- `RU-DMIP L1`;
+- `RU-DMIP L2`;
+- `RU-DMIP L3`;
+- `RU-DMIP L4`;
+- `RU-DMIP L5`.
 
 Заявление уровня должно подтверждаться conformance report.
+
+Для новых cross-market материалов SHOULD использоваться `RU-DMIP`. `RU-DAX` остается допустимым alias для exchange/trading core.

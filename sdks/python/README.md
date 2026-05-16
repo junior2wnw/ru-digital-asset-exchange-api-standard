@@ -1,6 +1,6 @@
 # SpreadX Python SDK
 
-Reference Python SDK for the RU-DAX interoperability profile draft.
+Reference Python SDK for the RU Digital Market Interoperability Profile draft.
 
 ```python
 from spreadx import Client
@@ -8,6 +8,7 @@ from spreadx import Client
 client = Client("http://127.0.0.1:8080", api_key="sandbox-key")
 print(client.time())
 print(client.profile())
+print(client.compliance_profile())
 print(client.instruments())
 print(client.create_order(
     instrument_id="BTC-RUB-SPOT",

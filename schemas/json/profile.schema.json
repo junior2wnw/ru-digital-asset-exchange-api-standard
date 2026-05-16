@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:ru-dax:schema:profile:0.2",
+  "$id": "urn:ru-dmip:schema:profile:0.3",
   "title": "VenueProfile",
   "type": "object",
   "required": [
@@ -17,7 +17,7 @@
   "properties": {
     "profile_id": {
       "type": "string",
-      "const": "ru-dax"
+      "const": "ru-dmip"
     },
     "profile_version": {
       "type": "string",

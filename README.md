@@ -1,8 +1,8 @@
-# RU Digital Asset Exchange API Standard
+# RU Digital Market Interoperability Profile
 
-Draft открытого API-профиля для совместимой и law-aware инфраструктуры цифровых активов, цифровой валюты, цифрового рубля, ЦФА, открытых API и производных инструментов.
+Draft открытого API-профиля для совместимой и law-aware инфраструктуры цифрового финансового рынка: ЦФА, цифровой валюты, цифрового рубля, открытых API, custody, брокерских, биржевых, отчетных и производных контуров.
 
-Проект решает простую задачу: дать рынку общий технический язык. Не монополию SDK, не “обязать всех пользоваться одной библиотекой”, не официальную позицию регулятора, а проверяемый открытый профиль: спецификации, схемы, SDK, mock exchange и conformance tests.
+Проект решает простую задачу: дать рынку общий технический язык. Не монополию SDK, не “обязать всех пользоваться одной библиотекой”, не официальную позицию регулятора, а проверяемый открытый профиль: спецификации, схемы, SDK, mock venue и conformance tests.
 
 ## Короткая Формула
 
@@ -20,11 +20,11 @@ Draft открытого API-профиля для совместимой и law
 | Раздел | Назначение |
 | --- | --- |
 | `docs/` | White paper, позиционирование, профили участников рынка, правовое соответствие РФ, безопасность, governance, roadmap |
-| `spec/` | Технические профили REST, WebSocket, FIX, market model, wallet model |
+| `spec/` | Технические профили REST, WebSocket, FIX, market model, wallet model, compliance and reporting |
 | `schemas/` | OpenAPI и JSON Schema для машинной совместимости |
 | `sdks/python/` | Python SDK как reference client |
 | `sdks/typescript/` | TypeScript SDK как reference client |
-| `mock-exchange/` | Reference mock exchange для sandbox и локальных тестов |
+| `mock-exchange/` | Reference mock venue для sandbox и локальных тестов |
 | `tests/conformance/` | Conformance test suite для проверки совместимости |
 | `postman/` | Postman collection для ручной проверки |
 | `submissions/` | Пакет обращений, приложение и DOCX/HTML для подачи предложения |
@@ -32,19 +32,23 @@ Draft открытого API-профиля для совместимой и law
 
 ## Как Это Называть
 
-Техническое название:
+Техническое название верхнего уровня:
 
-**RU Digital Asset Exchange API Standard**
+**RU Digital Market Interoperability Profile**
 
-Более точное позиционирование:
+Короткое позиционирование:
 
-**RU-DAX Interoperability Profile**
+**RU-DMIP**
+
+Историческое рабочее название:
+
+**RU Digital Asset Exchange API Standard / RU-DAX Interoperability Profile**
 
 Reference implementation:
 
 **SpreadX SDK**
 
-Так разделяются три вещи: стандарт, профиль совместимости и конкретная библиотека.
+Так разделяются три вещи: профиль совместимости рынка, прежнее биржевое ядро и конкретная reference-библиотека.
 
 ## Область Покрытия
 
@@ -66,8 +70,9 @@ Reference implementation:
 - FIX-compatible profile для профессиональных участников;
 - sandbox/testnet;
 - conformance tests;
-- reference mock exchange.
-- profile discovery через `/v1/profile`.
+- reference mock venue;
+- profile discovery через `/v1/profile`;
+- L5 Compliance & Reporting: consent, AML/KYC boundary, audit events, regulatory reports, currency-control references.
 
 ## Принципы
 
@@ -82,7 +87,7 @@ Reference implementation:
 
 ## Быстрый Старт
 
-Терминал 1: mock exchange.
+Терминал 1: mock venue.
 
 ```powershell
 cd mock-exchange
@@ -135,12 +140,12 @@ Windows note: если репозиторий лежит в пути с кири
 
 | Уровень | Название | Проверяемая область |
 | --- | --- | --- |
-| L0 | Discovery | `/v1/time`, `/v1/instruments`, стандартные ошибки |
+| L0 | Discovery | `/v1/profile`, `/v1/time`, `/v1/instruments`, стандартные ошибки |
 | L1 | Market Data | order book, trades, candles, WebSocket market streams |
 | L2 | Trading | ордера, сделки, комиссии, лимиты, idempotency |
 | L3 | Wallet & Custody | депозиты, выводы, адреса, transfers, subaccounts |
 | L4 | Derivatives & FIX | positions, margin, funding, settlement, FIX-compatible profile |
-| L5 | Compliance & Reporting | consent, AML/KYC boundary, audit export, regulatory reporting profile |
+| L5 | Compliance & Reporting | `/v1/compliance/*`, `/v1/reports/*`, consent, AML/KYC boundary, audit events, regulatory reports |
 
 ## Правовая И Рыночная Линия
 
@@ -168,17 +173,17 @@ Windows note: если репозиторий лежит в пути с кири
 - market makers;
 - разработчикам торгового, учетного и риск-менеджмент ПО;
 - отраслевым ассоциациям;
-- регуляторным и аналитическим командам.
+- регуляторным и аналитическим командам;
 - ОИС ЦФА и ООЦФА;
 - операторам цифрового рубля, платежной и open API-инфраструктуры;
 - compliance, RegTech и audit-командам.
 
 ## Статус
 
-Статус репозитория: **Draft 0.2**.
+Статус репозитория: **Draft 0.3**.
 
 Это рабочий технический draft. До промышленного или нормативного использования нужны независимая правовая экспертиза, security review, отраслевое обсуждение и пилот с несколькими участниками рынка. Для правовой рамки РФ см. `docs/RU_LEGAL_ALIGNMENT.ru.md`, для карты участников рынка - `docs/PARTICIPANT_PROFILES.ru.md`.
 
 ## Лицензия
 
-Apache-2.0. Спецификации, SDK, mock exchange и тесты можно использовать, проверять, дорабатывать и внедрять в коммерческих и исследовательских проектах при соблюдении условий лицензии.
+Apache-2.0. Спецификации, SDK, mock venue и тесты можно использовать, проверять, дорабатывать и внедрять в коммерческих и исследовательских проектах при соблюдении условий лицензии.

@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "spreadx-mock-exchange"
-version = "0.2.0"
-description = "Reference mock exchange for the RU-DAX interoperability profile draft."
+version = "0.3.0"
+description = "Reference mock venue for the RU Digital Market Interoperability Profile draft."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"

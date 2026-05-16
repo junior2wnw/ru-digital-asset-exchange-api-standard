@@ -4,16 +4,19 @@
 
 ## Что Это
 
-RU-DAX Interoperability Profile - это open-source draft для совместимости API цифровых активов, цифровой валюты и производных инструментов.
+RU Digital Market Interoperability Profile - это open-source draft для совместимости API цифрового финансового рынка: ЦФА, цифровой валюты, цифрового рубля, открытых API, custody, брокерских, биржевых, отчетных и производных контуров.
+
+RU-DAX остается названием биржевого ядра внутри более широкого профиля. Это важно: рынок видит не только trading API, но и полный слой взаимодействия участников, данных, правовых ограничений и отчетных сценариев.
 
 Проект дает:
 
 - технический словарь;
 - REST и WebSocket профили;
 - FIX-compatible профиль;
+- L5 Compliance & Reporting профиль;
 - OpenAPI и JSON Schema;
 - SDK как reference clients;
-- mock exchange;
+- mock venue;
 - conformance tests.
 
 ## Чем Это Не Является
@@ -37,6 +40,10 @@ RU-DAX Interoperability Profile - это open-source draft для совмест
 
 > Рынку нужна проверяемая совместимость API. Мы предлагаем открытый draft, SDK и conformance tests как нейтральную отправную точку для обсуждения и пилота.
 
+Более точная формула для текущей версии:
+
+> Рынку нужен не единый поставщик технологии, а единый проверяемый язык взаимодействия: роли участников, уровни совместимости, правовые контуры, согласия, аудит, отчетность и тесты совместимости.
+
 ## Как Говорить О SDK
 
 SDK не должен называться обязательным. Его роль:
@@ -54,7 +61,7 @@ SDK не должен называться обязательным. Его ро
 2. Показать риски для надзора, отчетности и участников.
 3. Показать международные аналоги.
 4. Предложить нейтральную архитектуру.
-5. Показать working draft, mock exchange и тесты.
+5. Показать working draft, mock venue, L5 compliance/reporting profile и тесты.
 6. Предложить пилот, а не немедленную обязанность.
 
 ## GitHub Description
@@ -62,7 +69,7 @@ SDK не должен называться обязательным. Его ро
 Рекомендуемое описание репозитория:
 
 ```text
-Draft open interoperability profile, SDKs, schemas, mock exchange, and conformance tests for digital asset market APIs.
+Draft open interoperability profile, SDKs, schemas, mock venue, and conformance tests for digital market APIs, compliance, and reporting.
 ```
 
 Такое описание лучше исходного, потому что оно:
@@ -71,4 +78,3 @@ Draft open interoperability profile, SDKs, schemas, mock exchange, and conforman
 - не обещает регулирование там, где его еще нет;
 - не сужает проект только до exchanges;
 - сразу говорит про совместимость и тесты.
-

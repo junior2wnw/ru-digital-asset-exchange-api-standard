@@ -1,7 +1,7 @@
 {
   "name": "@spreadx/sdk",
-  "version": "0.2.0",
-  "description": "TypeScript reference client for the RU-DAX interoperability profile draft.",
+  "version": "0.3.0",
+  "description": "TypeScript reference client for the RU Digital Market Interoperability Profile draft.",
   "license": "Apache-2.0",
   "type": "module",
   "main": "dist/index.js",

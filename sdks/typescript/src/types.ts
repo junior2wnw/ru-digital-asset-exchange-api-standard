@@ -52,7 +52,7 @@ export type LegalFrameworkId =
   | "other";
 
 export interface VenueProfile {
-  profile_id: "ru-dax";
+  profile_id: "ru-dmip";
   profile_version: string;
   jurisdiction: string;
   operator_roles: OperatorRole[];
@@ -85,6 +85,84 @@ export interface VenueProfile {
     extensions?: Record<string, unknown>;
   };
   last_updated: string;
+  extensions?: Record<string, unknown>;
+}
+
+export type ComplianceStatus =
+  | "not_required"
+  | "pending"
+  | "approved"
+  | "information_required"
+  | "manual_review"
+  | "rejected"
+  | "blocked"
+  | "expired";
+
+export type ConsentStatus = "active" | "pending" | "expired" | "revoked" | "rejected" | "suspended";
+
+export type ReportStatus =
+  | "not_started"
+  | "preparing"
+  | "ready"
+  | "submitted"
+  | "accepted"
+  | "rejected"
+  | "cancelled"
+  | "expired";
+
+export interface ComplianceProfile {
+  profile_id: "ru-dmip-l5";
+  level: "L5";
+  supported_scopes: string[];
+  consent_required: boolean;
+  personal_data_public_api_allowed: false;
+  status_vocabulary: ComplianceStatus[];
+  retention_classes: string[];
+  extensions?: Record<string, unknown>;
+}
+
+export interface ConsentRecord {
+  consent_id: string;
+  subject_ref: string;
+  subject_type: "individual" | "legal_entity" | "account" | "subaccount";
+  status: ConsentStatus;
+  scopes: string[];
+  data_categories: string[];
+  purpose: string;
+  legal_basis: string;
+  granted_at: string;
+  expires_at?: string;
+  revoked_at?: string;
+  extensions?: Record<string, unknown>;
+}
+
+export interface AuditEvent {
+  audit_event_id: string;
+  event_type: string;
+  event_time: string;
+  actor_type: "user" | "system" | "operator" | "api_key" | "regulator";
+  actor_ref: string;
+  resource_type: string;
+  resource_id: string;
+  action: string;
+  result: "success" | "failure" | "pending" | "blocked";
+  request_id: string;
+  retention_class: string;
+  extensions?: Record<string, unknown>;
+}
+
+export interface RegulatoryReport {
+  report_id: string;
+  report_type: string;
+  framework_id: string;
+  period_start: string;
+  period_end: string;
+  status: ReportStatus;
+  generated_at?: string;
+  delivery_channel: string;
+  protected_download_ref?: string;
+  checksum?: string;
+  retention_class: string;
   extensions?: Record<string, unknown>;
 }
 

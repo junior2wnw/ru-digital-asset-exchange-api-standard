@@ -34,6 +34,10 @@ All timestamps use RFC 3339 UTC. All decimal values use strings.
 | `POST` | `/v1/wallet/withdrawals` | Create withdrawal |
 | `GET` | `/v1/wallet/withdrawals` | Withdrawal history |
 | `POST` | `/v1/transfers` | Internal transfer |
+| `GET` | `/v1/compliance/profile` | L5 compliance and reporting profile |
+| `GET` | `/v1/compliance/consents` | Consent records and data-sharing scopes |
+| `GET` | `/v1/compliance/audit-events` | Normalized audit events |
+| `GET` | `/v1/reports/regulatory` | Regulatory report descriptors |
 
 ## Venue Profile
 
@@ -50,6 +54,21 @@ It MUST return:
 - `data_governance` for consent, personal data, retention, and audit trail responsibility.
 
 The profile does not grant legal permission. It only declares the technical and operational contract a venue is willing to expose.
+
+## L5 Compliance and Reporting
+
+L5 endpoints are private. They standardize metadata and status vocabularies, not the disclosure of protected data.
+
+Implementations MUST apply the same authentication and replay-protection rules as other private endpoints. Production implementations SHOULD add role-based authorization for:
+
+- consent records;
+- AML/KYC status reads;
+- audit event feeds;
+- regulatory report descriptors;
+- protected export references;
+- currency-control document references.
+
+Clients MUST treat L5 responses as operational and compliance metadata. A conformance response does not prove that an organization has a license, registry status, investor classification, platform approval, regulator acceptance, or permission for a specific operation.
 
 ## Headers
 

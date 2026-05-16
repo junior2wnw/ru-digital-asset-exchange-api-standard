@@ -1,2 +1,1 @@
-"""RU-DAX conformance test helpers."""
-
+"""RU-DMIP conformance test helpers."""

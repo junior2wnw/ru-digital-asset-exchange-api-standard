@@ -17,6 +17,9 @@
 - `wallet`;
 - `transfer`;
 - `fix`;
+- `compliance`;
+- `reporting`;
+- `audit`;
 - `admin`.
 
 Ключи SHOULD поддерживать:
@@ -76,9 +79,23 @@ Private WebSocket sessions SHOULD использовать challenge-response:
 - выводы;
 - internal transfers;
 - изменение API keys;
-- изменение withdrawal address book.
+- изменение withdrawal address book;
+- изменение consent records;
+- compliance decisions;
+- создание и выгрузка отчетных наборов.
+
+## L5 Protected Data
+
+L5 Compliance & Reporting endpoints MUST be private. Они SHOULD использовать отдельные scopes:
+
+- `consent.read`;
+- `compliance.status.read`;
+- `audit.events.read`;
+- `reports.regulatory.read`;
+- `fx_control.references.read`.
+
+Публичные endpoint не должны раскрывать персональные данные, банковскую тайну, KYC-документы, внутренние scoring rules, сведения ограниченного доступа или защищенные отчетные файлы. Если клиенту нужна выгрузка, API SHOULD отдавать protected reference, checksum, retention class и delivery channel, а не сам файл в публичном контуре.
 
 ## Incident Compatibility
 
 Площадка SHOULD публиковать machine-readable status endpoint или status feed, чтобы клиенты могли отличать плановое ограничение от аварии.
-

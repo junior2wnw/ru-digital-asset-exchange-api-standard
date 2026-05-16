@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "RU Digital Asset Exchange API Standard",
-    "description": "Reference Postman collection for the RU-DAX interoperability profile draft.",
+    "name": "RU Digital Market Interoperability Profile",
+    "description": "Reference Postman collection for the RU Digital Market Interoperability Profile draft.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -166,6 +166,51 @@
               "raw": "{\n  \"asset_id\": \"USDT\",\n  \"network_id\": \"TRON\",\n  \"amount\": \"10\",\n  \"address\": \"TXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\"\n}"
             },
             "url": "{{baseUrl}}/v1/wallet/withdrawals"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Compliance & Reporting",
+      "item": [
+        {
+          "name": "Compliance Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-Key", "value": "{{apiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/compliance/profile"
+          }
+        },
+        {
+          "name": "Consents",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-Key", "value": "{{apiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/compliance/consents"
+          }
+        },
+        {
+          "name": "Audit Events",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-Key", "value": "{{apiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/compliance/audit-events?limit=50"
+          }
+        },
+        {
+          "name": "Regulatory Reports",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-Key", "value": "{{apiKey}}" }
+            ],
+            "url": "{{baseUrl}}/v1/reports/regulatory"
           }
         }
       ]

@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
-  title: RU Digital Asset Exchange API Standard
-  version: 0.2.0
-  summary: Draft REST API profile for interoperable and law-aware digital asset market infrastructure.
+  title: RU Digital Market Interoperability Profile
+  version: 0.3.0
+  summary: Draft REST API profile for interoperable, law-aware digital market infrastructure.
   license:
     name: Apache-2.0
 servers:
@@ -17,6 +17,8 @@ tags:
   - name: trading
   - name: account
   - name: wallet
+  - name: compliance
+  - name: reporting
   - name: reference
 paths:
   /v1/profile:
@@ -432,6 +434,82 @@ paths:
             application/json:
               schema:
                 $ref: "./json/wallet_transaction.schema.json"
+  /v1/compliance/profile:
+    get:
+      tags: [compliance]
+      security:
+        - ApiKeyAuth: []
+      summary: Get L5 compliance and reporting profile.
+      operationId: getComplianceProfile
+      responses:
+        "200":
+          description: Compliance profile.
+          content:
+            application/json:
+              schema:
+                $ref: "./json/compliance.schema.json#/$defs/ComplianceProfile"
+  /v1/compliance/consents:
+    get:
+      tags: [compliance]
+      security:
+        - ApiKeyAuth: []
+      summary: List consent records and data-sharing scopes.
+      operationId: listComplianceConsents
+      responses:
+        "200":
+          description: Consent records.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "./json/compliance.schema.json#/$defs/ConsentRecord"
+  /v1/compliance/audit-events:
+    get:
+      tags: [compliance]
+      security:
+        - ApiKeyAuth: []
+      summary: List normalized audit events.
+      operationId: listAuditEvents
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Audit events.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "./json/compliance.schema.json#/$defs/AuditEvent"
+  /v1/reports/regulatory:
+    get:
+      tags: [reporting]
+      security:
+        - ApiKeyAuth: []
+      summary: List regulatory report descriptors.
+      operationId: listRegulatoryReports
+      responses:
+        "200":
+          description: Regulatory reports.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "./json/compliance.schema.json#/$defs/RegulatoryReport"
   /v1/fees:
     get:
       tags: [reference]

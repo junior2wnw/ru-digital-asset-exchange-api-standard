@@ -1,6 +1,6 @@
 # SpreadX TypeScript SDK
 
-Reference TypeScript SDK for the RU-DAX interoperability profile draft.
+Reference TypeScript SDK for the RU Digital Market Interoperability Profile draft.
 
 ```ts
 import { SpreadXClient } from "@spreadx/sdk";
@@ -12,6 +12,7 @@ const client = new SpreadXClient({
 
 console.log(await client.time());
 console.log(await client.profile());
+console.log(await client.complianceProfile());
 console.log(await client.instruments());
 ```
 

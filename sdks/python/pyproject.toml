@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "spreadx"
-version = "0.2.0"
-description = "Python reference client for the RU-DAX interoperability profile draft."
+version = "0.3.0"
+description = "Python reference client for the RU Digital Market Interoperability Profile draft."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
 authors = [
-  { name = "RU-DAX contributors" }
+  { name = "RU-DMIP contributors" }
 ]
 dependencies = [
   "httpx>=0.27"

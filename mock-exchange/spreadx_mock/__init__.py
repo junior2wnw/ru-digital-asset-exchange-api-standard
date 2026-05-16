@@ -1,2 +1,1 @@
-"""SpreadX mock exchange package."""
-
+"""RU-DMIP mock venue package."""

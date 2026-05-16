@@ -1,6 +1,6 @@
-# SpreadX Mock Exchange
+# RU-DMIP Mock Venue
 
-Reference sandbox implementation for the RU-DAX interoperability profile draft.
+Reference sandbox implementation for the RU Digital Market Interoperability Profile draft.
 
 Run locally:
 
@@ -17,6 +17,8 @@ Private endpoints accept:
 X-API-Key: sandbox-key
 ```
 
-The mock exchange is intentionally deterministic and small. It exists to test SDKs, demos, Postman collections, and conformance checks.
+The mock venue is intentionally deterministic and small. It exists to test SDKs, demos, Postman collections, and conformance checks.
 
 Use `GET /v1/profile` to inspect the advertised participant roles, compatibility levels, capabilities, legal profiles, and data-governance contract.
+
+Use `GET /v1/compliance/profile`, `/v1/compliance/consents`, `/v1/compliance/audit-events`, and `/v1/reports/regulatory` to inspect the L5 compliance and reporting surface.

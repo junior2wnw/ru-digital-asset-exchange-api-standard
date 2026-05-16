@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+- Reframed the public project name as RU Digital Market Interoperability Profile, with RU-DAX retained as the exchange/trading core.
+- Added L5 Compliance & Reporting specification for consent, AML/KYC boundary, audit events, regulatory report descriptors, and currency-control references.
+- Added private L5 REST endpoints: `/v1/compliance/profile`, `/v1/compliance/consents`, `/v1/compliance/audit-events`, and `/v1/reports/regulatory`.
+- Added L5 JSON Schema, mock venue responses, SDK methods, Postman coverage, and conformance tests.
+- Updated Russian positioning, legal alignment, standard, white paper, roadmap, README, and package versions to Draft 0.3.
+
 ## 0.2.0
 
 - Added `/v1/profile` for venue roles, compatibility levels, capabilities, legal profiles, and data governance.

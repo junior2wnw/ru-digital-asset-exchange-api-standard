@@ -32,10 +32,9 @@ jobs:
         run: |
           python -m pip install -U pip
           python -m pip install ./sdks/python ./mock-exchange ./tests/conformance
-      - name: Start mock exchange
+      - name: Start mock venue
         run: |
           uvicorn spreadx_mock.app:app --host 127.0.0.1 --port 8080 &
           sleep 3
       - name: Run conformance tests
         run: pytest tests/conformance --base-url http://127.0.0.1:8080 --api-key sandbox-key
-

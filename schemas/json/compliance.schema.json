@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ru-dmip:schema:compliance:0.3",
+  "title": "ComplianceAndReporting",
+  "$defs": {
+    "ComplianceStatus": {
+      "type": "string",
+      "enum": [
+        "not_required",
+        "pending",
+        "approved",
+        "information_required",
+        "manual_review",
+        "rejected",
+        "blocked",
+        "expired"
+      ]
+    },
+    "ConsentStatus": {
+      "type": "string",
+      "enum": ["active", "pending", "expired", "revoked", "rejected", "suspended"]
+    },
+    "ReportStatus": {
+      "type": "string",
+      "enum": ["not_started", "preparing", "ready", "submitted", "accepted", "rejected", "cancelled", "expired"]
+    },
+    "ComplianceProfile": {
+      "type": "object",
+      "required": [
+        "profile_id",
+        "level",
+        "supported_scopes",
+        "consent_required",
+        "personal_data_public_api_allowed",
+        "status_vocabulary",
+        "retention_classes"
+      ],
+      "properties": {
+        "profile_id": { "type": "string", "const": "ru-dmip-l5" },
+        "level": { "type": "string", "const": "L5" },
+        "supported_scopes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "consent_required": { "type": "boolean" },
+        "personal_data_public_api_allowed": { "type": "boolean", "const": false },
+        "status_vocabulary": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ComplianceStatus" },
+          "uniqueItems": true
+        },
+        "retention_classes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "extensions": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": false
+    },
+    "ConsentRecord": {
+      "type": "object",
+      "required": [
+        "consent_id",
+        "subject_ref",
+        "subject_type",
+        "status",
+        "scopes",
+        "data_categories",
+        "purpose",
+        "legal_basis",
+        "granted_at"
+      ],
+      "properties": {
+        "consent_id": { "type": "string" },
+        "subject_ref": { "type": "string" },
+        "subject_type": { "type": "string", "enum": ["individual", "legal_entity", "account", "subaccount"] },
+        "status": { "$ref": "#/$defs/ConsentStatus" },
+        "scopes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "data_categories": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "purpose": { "type": "string" },
+        "legal_basis": { "type": "string" },
+        "granted_at": { "type": "string", "format": "date-time" },
+        "expires_at": { "type": "string", "format": "date-time" },
+        "revoked_at": { "type": "string", "format": "date-time" },
+        "extensions": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": false
+    },
+    "AuditEvent": {
+      "type": "object",
+      "required": [
+        "audit_event_id",
+        "event_type",
+        "event_time",
+        "actor_type",
+        "actor_ref",
+        "resource_type",
+        "resource_id",
+        "action",
+        "result",
+        "request_id",
+        "retention_class"
+      ],
+      "properties": {
+        "audit_event_id": { "type": "string" },
+        "event_type": { "type": "string" },
+        "event_time": { "type": "string", "format": "date-time" },
+        "actor_type": { "type": "string", "enum": ["user", "system", "operator", "api_key", "regulator"] },
+        "actor_ref": { "type": "string" },
+        "resource_type": { "type": "string" },
+        "resource_id": { "type": "string" },
+        "action": { "type": "string" },
+        "result": { "type": "string", "enum": ["success", "failure", "pending", "blocked"] },
+        "request_id": { "type": "string" },
+        "retention_class": { "type": "string" },
+        "extensions": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": false
+    },
+    "RegulatoryReport": {
+      "type": "object",
+      "required": [
+        "report_id",
+        "report_type",
+        "framework_id",
+        "period_start",
+        "period_end",
+        "status",
+        "delivery_channel",
+        "retention_class"
+      ],
+      "properties": {
+        "report_id": { "type": "string" },
+        "report_type": { "type": "string" },
+        "framework_id": { "type": "string" },
+        "period_start": { "type": "string", "format": "date-time" },
+        "period_end": { "type": "string", "format": "date-time" },
+        "status": { "$ref": "#/$defs/ReportStatus" },
+        "generated_at": { "type": "string", "format": "date-time" },
+        "delivery_channel": { "type": "string" },
+        "protected_download_ref": { "type": "string" },
+        "checksum": { "type": "string" },
+        "retention_class": { "type": "string" },
+        "extensions": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": false
+    }
+  }
+}

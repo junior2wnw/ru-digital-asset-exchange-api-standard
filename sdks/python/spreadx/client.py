@@ -16,7 +16,7 @@ JsonObject = dict[str, Any]
 
 
 class Client:
-    """Small synchronous reference client for RU-DAX compatible APIs."""
+    """Small synchronous reference client for RU-DMIP compatible APIs."""
 
     def __init__(
         self,
@@ -154,6 +154,23 @@ class Client:
             private=True,
             idempotency_key=idempotency_key,
         )
+
+    def compliance_profile(self) -> JsonObject:
+        return self._request("GET", "/v1/compliance/profile", private=True)
+
+    def compliance_consents(self) -> list[JsonObject]:
+        return self._request("GET", "/v1/compliance/consents", private=True)["items"]
+
+    def audit_events(self, *, limit: int = 100) -> list[JsonObject]:
+        return self._request(
+            "GET",
+            "/v1/compliance/audit-events",
+            params={"limit": limit},
+            private=True,
+        )["items"]
+
+    def regulatory_reports(self) -> list[JsonObject]:
+        return self._request("GET", "/v1/reports/regulatory", private=True)["items"]
 
     def fees(self) -> list[JsonObject]:
         return self._request("GET", "/v1/fees")["items"]

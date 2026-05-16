@@ -6,7 +6,7 @@ import httpx
 
 
 class APIError(Exception):
-    """Error returned by a RU-DAX compatible API."""
+    """Error returned by a RU-DMIP compatible API."""
 
     def __init__(
         self,
@@ -41,4 +41,3 @@ class APIError(Exception):
             request_id=error.get("request_id"),
             details=error.get("details") or {},
         )
-

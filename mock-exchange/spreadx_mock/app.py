@@ -8,9 +8,9 @@ from fastapi.responses import JSONResponse
 
 
 app = FastAPI(
-    title="SpreadX Mock Exchange",
-    version="0.2.0",
-    description="Reference mock exchange for the RU-DAX interoperability profile draft.",
+    title="RU-DMIP Mock Venue",
+    version="0.3.0",
+    description="Reference mock venue for the RU Digital Market Interoperability Profile draft.",
 )
 
 
@@ -230,8 +230,8 @@ TRANSFERS: list[dict[str, object]] = []
 IDEMPOTENCY: dict[str, dict[str, object]] = {}
 
 PROFILE = {
-    "profile_id": "ru-dax",
-    "profile_version": "0.2.0",
+    "profile_id": "ru-dmip",
+    "profile_version": "0.3.0",
     "jurisdiction": "RU",
     "operator_roles": [
         "exchange",
@@ -241,12 +241,17 @@ PROFILE = {
         "ootsfa",
         "custodian",
         "wallet_provider",
+        "payment_provider",
         "market_maker",
+        "issuer",
+        "qualified_investor_gateway",
         "compliance_provider",
         "analytics_provider",
         "developer_tool",
+        "regulator_observer",
+        "mining_infrastructure_operator",
     ],
-    "compatibility_levels": ["L0", "L1", "L2", "L3", "L4"],
+    "compatibility_levels": ["L0", "L1", "L2", "L3", "L4", "L5"],
     "capabilities": [
         {"capability_id": "discovery", "level": "L0", "status": "supported"},
         {"capability_id": "sandbox", "level": "L0", "status": "supported"},
@@ -256,8 +261,12 @@ PROFILE = {
         {"capability_id": "wallet_custody", "level": "L3", "status": "supported"},
         {"capability_id": "derivatives", "level": "L4", "status": "supported"},
         {"capability_id": "fix", "level": "L4", "status": "planned"},
-        {"capability_id": "aml_kyc", "level": "L3", "status": "sandbox_only"},
-        {"capability_id": "regulatory_reporting", "level": "L5", "status": "planned"},
+        {"capability_id": "open_api_consent", "level": "L5", "status": "supported"},
+        {"capability_id": "aml_kyc", "level": "L5", "status": "supported"},
+        {"capability_id": "audit_export", "level": "L5", "status": "supported"},
+        {"capability_id": "regulatory_reporting", "level": "L5", "status": "supported"},
+        {"capability_id": "fx_control", "level": "L5", "status": "supported"},
+        {"capability_id": "tax_reporting", "level": "L5", "status": "planned"},
     ],
     "legal_profiles": [
         {
@@ -266,6 +275,20 @@ PROFILE = {
             "applies_to": ["cfa_issuance", "cfa_exchange"],
             "description": "CFA issuance and CFA exchange activity require an eligible Russian legal entity and inclusion in the relevant Bank of Russia register.",
             "source_url": "https://www.cbr.ru/finm_infrastructure/digital_oper/",
+        },
+        {
+            "framework_id": "open-api-cbr-standards",
+            "status": "implementation_responsibility",
+            "applies_to": ["open_api_consent"],
+            "description": "Client data exchange through Open API-style integrations is consent-based and must follow the applicable security and consent model.",
+            "source_url": "https://www.cbr.ru/fintech/api/",
+        },
+        {
+            "framework_id": "161-fz-digital-ruble",
+            "status": "implementation_responsibility",
+            "applies_to": ["digital_ruble", "aml_kyc"],
+            "description": "Digital ruble operations are a separate platform and payment contour with AML responsibilities allocated by the applicable rules.",
+            "source_url": "https://www.cbr.ru/fintech/dr/",
         },
         {
             "framework_id": "115-fz-aml",
@@ -281,6 +304,13 @@ PROFILE = {
             "description": "Personal data processing, consent, localization, security, and incident notification are implementation responsibilities.",
             "source_url": "https://rkn.gov.ru/",
         },
+        {
+            "framework_id": "173-fz-currency-control",
+            "status": "implementation_responsibility",
+            "applies_to": ["fx_control", "regulatory_reporting"],
+            "description": "Digital-right operations connected to foreign-trade or currency-control scenarios require structured document and operation references in the authorized-bank contour.",
+            "source_url": "https://www.cbr.ru/press/event/?id=23173",
+        },
     ],
     "data_governance": {
         "client_consent_required": True,
@@ -289,12 +319,129 @@ PROFILE = {
         "retention_policy": "Defined by the regulated venue and applicable Russian law.",
     },
     "last_updated": "2026-05-16T00:00:00Z",
+    "extensions": {
+        "aliases": ["ru-dax"],
+        "public_name": "RU Digital Market Interoperability Profile",
+    },
 }
+
+COMPLIANCE_PROFILE = {
+    "profile_id": "ru-dmip-l5",
+    "level": "L5",
+    "supported_scopes": [
+        "consent.read",
+        "compliance.status.read",
+        "audit.events.read",
+        "reports.regulatory.read",
+        "fx_control.references.read",
+    ],
+    "consent_required": True,
+    "personal_data_public_api_allowed": False,
+    "status_vocabulary": [
+        "not_required",
+        "pending",
+        "approved",
+        "information_required",
+        "manual_review",
+        "rejected",
+        "blocked",
+        "expired",
+    ],
+    "retention_classes": ["operational", "regulatory", "security", "client_consent"],
+    "extensions": {
+        "data_minimization": True,
+        "sandbox_notice": "Reference data is synthetic and does not contain personal data.",
+    },
+}
+
+CONSENTS = [
+    {
+        "consent_id": "consent_demo_open_api_1",
+        "subject_ref": "subject_demo_hash_001",
+        "subject_type": "legal_entity",
+        "status": "active",
+        "scopes": ["accounts.summary.read", "reports.regulatory.read"],
+        "data_categories": ["account_metadata", "operation_references", "report_descriptors"],
+        "purpose": "Interoperability pilot and reporting reconciliation",
+        "legal_basis": "client_consent",
+        "granted_at": "2026-05-16T00:00:00Z",
+        "expires_at": "2026-11-16T00:00:00Z",
+    }
+]
+
+AUDIT_EVENTS = [
+    {
+        "audit_event_id": "audit_demo_0001",
+        "event_type": "consent_lifecycle",
+        "event_time": "2026-05-16T00:00:00Z",
+        "actor_type": "api_key",
+        "actor_ref": "key_demo_reporting",
+        "resource_type": "consent",
+        "resource_id": "consent_demo_open_api_1",
+        "action": "granted",
+        "result": "success",
+        "request_id": "req_demo_0001",
+        "retention_class": "client_consent",
+    },
+    {
+        "audit_event_id": "audit_demo_0002",
+        "event_type": "report_generation",
+        "event_time": "2026-05-16T00:01:00Z",
+        "actor_type": "system",
+        "actor_ref": "reporting_scheduler",
+        "resource_type": "regulatory_report",
+        "resource_id": "report_demo_q2_fx_refs",
+        "action": "prepared",
+        "result": "success",
+        "request_id": "req_demo_0002",
+        "retention_class": "regulatory",
+    },
+]
+
+REGULATORY_REPORTS = [
+    {
+        "report_id": "report_demo_q2_fx_refs",
+        "report_type": "currency_control_digital_rights_references",
+        "framework_id": "173-fz-currency-control",
+        "period_start": "2026-04-01T00:00:00Z",
+        "period_end": "2026-06-30T23:59:59Z",
+        "status": "ready",
+        "generated_at": "2026-05-16T00:01:00Z",
+        "delivery_channel": "protected_api",
+        "protected_download_ref": "export_ref_demo_q2_fx_refs",
+        "checksum": "sha256:demo",
+        "retention_class": "regulatory",
+        "extensions": {
+            "contains_personal_data": False,
+            "contains_document_references": True,
+        },
+    }
+]
 
 
 @app.get("/v1/profile")
 def venue_profile() -> dict[str, object]:
     return PROFILE
+
+
+@app.get("/v1/compliance/profile", dependencies=[Depends(require_api_key)])
+def compliance_profile() -> dict[str, object]:
+    return COMPLIANCE_PROFILE
+
+
+@app.get("/v1/compliance/consents", dependencies=[Depends(require_api_key)])
+def compliance_consents() -> dict[str, list[dict[str, object]]]:
+    return {"items": CONSENTS}
+
+
+@app.get("/v1/compliance/audit-events", dependencies=[Depends(require_api_key)])
+def compliance_audit_events(limit: int = Query(default=100, ge=1, le=1000)) -> dict[str, list[dict[str, object]]]:
+    return {"items": AUDIT_EVENTS[:limit]}
+
+
+@app.get("/v1/reports/regulatory", dependencies=[Depends(require_api_key)])
+def regulatory_reports() -> dict[str, list[dict[str, object]]]:
+    return {"items": REGULATORY_REPORTS}
 
 
 @app.get("/v1/time")

@@ -1,10 +1,14 @@
 import { SpreadXApiError } from "./errors.js";
 import type {
+  AuditEvent,
   Balance,
   Candle,
+  ComplianceProfile,
+  ConsentRecord,
   Instrument,
   Order,
   Position,
+  RegulatoryReport,
   Trade,
   VenueProfile,
   WalletAsset,
@@ -145,6 +149,32 @@ export class SpreadXClient {
       body: transfer,
       idempotencyKey,
     });
+  }
+
+  complianceProfile(): Promise<ComplianceProfile> {
+    return this.request("GET", "/v1/compliance/profile", { private: true });
+  }
+
+  async complianceConsents(): Promise<ConsentRecord[]> {
+    const data = await this.request<{ items: ConsentRecord[] }>("GET", "/v1/compliance/consents", {
+      private: true,
+    });
+    return data.items;
+  }
+
+  async auditEvents(limit = 100): Promise<AuditEvent[]> {
+    const data = await this.request<{ items: AuditEvent[] }>("GET", "/v1/compliance/audit-events", {
+      private: true,
+      query: { limit },
+    });
+    return data.items;
+  }
+
+  async regulatoryReports(): Promise<RegulatoryReport[]> {
+    const data = await this.request<{ items: RegulatoryReport[] }>("GET", "/v1/reports/regulatory", {
+      private: true,
+    });
+    return data.items;
   }
 
   private async request<T>(
