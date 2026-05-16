@@ -46,6 +46,9 @@ class Client:
     def time(self) -> JsonObject:
         return self._request("GET", "/v1/time")
 
+    def profile(self) -> JsonObject:
+        return self._request("GET", "/v1/profile")
+
     def instruments(self, *, type: str | None = None) -> list[JsonObject]:
         params = {"type": type} if type else None
         return self._request("GET", "/v1/instruments", params=params)["items"]
@@ -209,4 +212,3 @@ class Client:
             signature = hmac.new(self.api_secret.encode(), payload.encode(), hashlib.sha256).hexdigest()
             headers["X-Signature"] = signature
         return headers
-

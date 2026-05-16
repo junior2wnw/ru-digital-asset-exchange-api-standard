@@ -6,6 +6,7 @@ import type {
   Order,
   Position,
   Trade,
+  VenueProfile,
   WalletAsset,
   WalletTransaction,
 } from "./types.js";
@@ -31,6 +32,10 @@ export class SpreadXClient {
 
   time(): Promise<{ server_time: string }> {
     return this.request("GET", "/v1/time");
+  }
+
+  profile(): Promise<VenueProfile> {
+    return this.request("GET", "/v1/profile");
   }
 
   async instruments(filter?: { type?: string }): Promise<Instrument[]> {

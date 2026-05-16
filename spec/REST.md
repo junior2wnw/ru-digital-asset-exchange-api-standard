@@ -8,6 +8,7 @@ All timestamps use RFC 3339 UTC. All decimal values use strings.
 
 | Method | Path | Description |
 | --- | --- | --- |
+| `GET` | `/v1/profile` | Venue roles, compatibility levels, capabilities, and legal profiles |
 | `GET` | `/v1/time` | Server time |
 | `GET` | `/v1/instruments` | List instruments |
 | `GET` | `/v1/instruments/{instrument_id}` | Instrument details |
@@ -33,6 +34,22 @@ All timestamps use RFC 3339 UTC. All decimal values use strings.
 | `POST` | `/v1/wallet/withdrawals` | Create withdrawal |
 | `GET` | `/v1/wallet/withdrawals` | Withdrawal history |
 | `POST` | `/v1/transfers` | Internal transfer |
+
+## Venue Profile
+
+`GET /v1/profile` is the machine-readable entry point for every market participant.
+
+It MUST return:
+
+- `profile_id` and `profile_version`;
+- primary `jurisdiction`;
+- supported `operator_roles`;
+- advertised `compatibility_levels`;
+- feature `capabilities` with status `supported`, `sandbox_only`, `planned`, or `not_supported`;
+- `legal_profiles` that explain applicable law-aware boundaries;
+- `data_governance` for consent, personal data, retention, and audit trail responsibility.
+
+The profile does not grant legal permission. It only declares the technical and operational contract a venue is willing to expose.
 
 ## Headers
 
@@ -120,4 +137,3 @@ All non-2xx responses MUST use the standard error envelope:
   }
 }
 ```
-

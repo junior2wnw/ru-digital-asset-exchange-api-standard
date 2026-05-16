@@ -105,3 +105,12 @@ When legally required, wallet operations SHOULD include structured metadata:
 
 The standard does not mandate a specific legal interpretation. It reserves a structured field so compliance systems can interoperate.
 
+## Russian Law-Aware Guardrails
+
+Wallet and custody flows used in the Russian legal context SHOULD make the compliance boundary visible:
+
+- withdrawal and transfer responses SHOULD expose structured compliance statuses instead of free-form text;
+- `compliance_review` MUST NOT imply that a transfer is approved;
+- digital currency movements MUST NOT be described as a generally permitted domestic payment use outside the applicable legal regime;
+- personal data, AML/KYC attributes, address ownership data, and screening details MUST be scoped to private APIs and protected by the implementation;
+- sandbox wallet operations MUST be clearly separated from production permissions.

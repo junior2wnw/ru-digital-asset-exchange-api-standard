@@ -1,5 +1,13 @@
 # Roadmap
 
+## 0.2 Universal Market Profile
+
+- Add `/v1/profile` for participant roles, capabilities, legal profiles, and data governance.
+- Add participant-role model for exchanges, brokers, banks, OIS CFA, OOTSFA, custody, wallets, market makers, issuers, compliance, analytics, and developer tools.
+- Add Russian law-aware alignment document.
+- Add optional law-aware instrument fields: legal classification, regulatory scope, investor access, payment-use flag, and jurisdiction.
+- Add L5 Compliance & Reporting target level.
+
 ## 0.1 Draft
 
 - Опубликовать white paper.
@@ -51,6 +59,15 @@
 - Security review checklist.
 - Pilot package for regulators and industry associations.
 
+## 0.7 Compliance & Reporting
+
+- Consent-aware Open API profile.
+- AML/KYC status vocabulary.
+- Audit export profile.
+- Regulatory reporting metadata.
+- Currency-control document references.
+- Tax/reporting hooks for supported roles.
+
 ## 1.0 Candidate
 
 - At least two independent implementations.
@@ -58,4 +75,3 @@
 - Legal review.
 - Security review.
 - Regulator-ready specification package.
-

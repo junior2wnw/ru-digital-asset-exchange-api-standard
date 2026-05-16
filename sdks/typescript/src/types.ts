@@ -1,5 +1,93 @@
 export type DecimalString = string;
 
+export type OperatorRole =
+  | "exchange"
+  | "broker"
+  | "bank"
+  | "ois_cfa"
+  | "ootsfa"
+  | "custodian"
+  | "wallet_provider"
+  | "payment_provider"
+  | "market_maker"
+  | "issuer"
+  | "qualified_investor_gateway"
+  | "compliance_provider"
+  | "analytics_provider"
+  | "developer_tool"
+  | "regulator_observer"
+  | "mining_infrastructure_operator";
+
+export type CompatibilityLevel = "L0" | "L1" | "L2" | "L3" | "L4" | "L5";
+
+export type CapabilityId =
+  | "discovery"
+  | "market_data"
+  | "trading"
+  | "wallet_custody"
+  | "derivatives"
+  | "fix"
+  | "cfa_issuance"
+  | "cfa_exchange"
+  | "digital_ruble"
+  | "open_api_consent"
+  | "aml_kyc"
+  | "tax_reporting"
+  | "fx_control"
+  | "regulatory_reporting"
+  | "audit_export"
+  | "sandbox"
+  | "conformance";
+
+export type LegalFrameworkId =
+  | "259-fz-cfa"
+  | "161-fz-digital-ruble"
+  | "115-fz-aml"
+  | "152-fz-personal-data"
+  | "173-fz-currency-control"
+  | "258-fz-experimental-legal-regime"
+  | "open-api-cbr-standards"
+  | "mining-registry-tax"
+  | "platform-rules"
+  | "other";
+
+export interface VenueProfile {
+  profile_id: "ru-dax";
+  profile_version: string;
+  jurisdiction: string;
+  operator_roles: OperatorRole[];
+  compatibility_levels: CompatibilityLevel[];
+  capabilities: Array<{
+    capability_id: CapabilityId;
+    level: CompatibilityLevel;
+    status: "supported" | "sandbox_only" | "planned" | "not_supported";
+    description?: string;
+    extensions?: Record<string, unknown>;
+  }>;
+  legal_profiles: Array<{
+    framework_id: LegalFrameworkId;
+    status:
+      | "applicable"
+      | "requires_registration"
+      | "requires_license_or_register"
+      | "requires_experimental_regime"
+      | "not_applicable"
+      | "implementation_responsibility";
+    applies_to: CapabilityId[];
+    description?: string;
+    source_url?: string;
+  }>;
+  data_governance: {
+    client_consent_required: boolean;
+    personal_data_policy: "not_applicable" | "implementation_responsibility" | "documented";
+    audit_trail_required: boolean;
+    retention_policy?: string;
+    extensions?: Record<string, unknown>;
+  };
+  last_updated: string;
+  extensions?: Record<string, unknown>;
+}
+
 export type InstrumentType =
   | "spot"
   | "margin_spot"
@@ -24,6 +112,33 @@ export interface Instrument {
   min_notional: DecimalString;
   fee_schedule_id: string;
   risk_profile_id: string;
+  legal_classification?:
+    | "digital_currency"
+    | "digital_financial_asset"
+    | "hybrid_digital_right"
+    | "foreign_digital_right"
+    | "digital_ruble"
+    | "security"
+    | "derivative"
+    | "commodity"
+    | "fiat_currency"
+    | "other";
+  regulatory_scope?:
+    | "production_ru_registered"
+    | "experimental_legal_regime"
+    | "foreign_market"
+    | "sandbox"
+    | "implementation_defined";
+  investor_access?:
+    | "retail"
+    | "qualified_investor"
+    | "specially_qualified_investor"
+    | "institutional"
+    | "registered_user"
+    | "not_applicable"
+    | "implementation_defined";
+  payment_use_allowed?: boolean;
+  jurisdiction?: string;
   underlying?: string;
   settlement_asset?: string;
   margin_asset?: string;
@@ -139,4 +254,3 @@ export interface WalletTransaction {
   to_account_id?: string;
   travel_rule?: Record<string, unknown>;
 }
-

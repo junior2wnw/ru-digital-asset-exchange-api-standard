@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:ru-dax:schema:instrument:0.1",
+  "$id": "urn:ru-dax:schema:instrument:0.2",
   "title": "Instrument",
   "type": "object",
   "required": [
@@ -47,6 +47,45 @@
     "min_notional": { "$ref": "#/$defs/decimal" },
     "fee_schedule_id": { "type": "string" },
     "risk_profile_id": { "type": "string" },
+    "legal_classification": {
+      "type": "string",
+      "enum": [
+        "digital_currency",
+        "digital_financial_asset",
+        "hybrid_digital_right",
+        "foreign_digital_right",
+        "digital_ruble",
+        "security",
+        "derivative",
+        "commodity",
+        "fiat_currency",
+        "other"
+      ]
+    },
+    "regulatory_scope": {
+      "type": "string",
+      "enum": [
+        "production_ru_registered",
+        "experimental_legal_regime",
+        "foreign_market",
+        "sandbox",
+        "implementation_defined"
+      ]
+    },
+    "investor_access": {
+      "type": "string",
+      "enum": [
+        "retail",
+        "qualified_investor",
+        "specially_qualified_investor",
+        "institutional",
+        "registered_user",
+        "not_applicable",
+        "implementation_defined"
+      ]
+    },
+    "payment_use_allowed": { "type": "boolean" },
+    "jurisdiction": { "type": "string" },
     "underlying": { "type": "string" },
     "settlement_asset": { "type": "string" },
     "margin_asset": { "type": "string" },

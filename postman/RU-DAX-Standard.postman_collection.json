@@ -34,6 +34,13 @@
           }
         },
         {
+          "name": "Venue Profile",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/v1/profile"
+          }
+        },
+        {
           "name": "Instruments",
           "request": {
             "method": "GET",

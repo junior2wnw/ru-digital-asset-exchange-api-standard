@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: RU Digital Asset Exchange API Standard
-  version: 0.1.0
-  summary: Draft REST API profile for interoperable digital asset market infrastructure.
+  version: 0.2.0
+  summary: Draft REST API profile for interoperable and law-aware digital asset market infrastructure.
   license:
     name: Apache-2.0
 servers:
@@ -12,12 +12,25 @@ servers:
     description: Sandbox
 tags:
   - name: discovery
+  - name: profile
   - name: market
   - name: trading
   - name: account
   - name: wallet
   - name: reference
 paths:
+  /v1/profile:
+    get:
+      tags: [discovery, profile]
+      summary: Get venue interoperability, participant-role, and legal capability profile.
+      operationId: getProfile
+      responses:
+        "200":
+          description: Venue profile.
+          content:
+            application/json:
+              schema:
+                $ref: "./json/profile.schema.json"
   /v1/time:
     get:
       tags: [discovery]

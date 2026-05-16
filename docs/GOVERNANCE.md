@@ -10,6 +10,8 @@
 
 **Reviewers** проверяют security, legal, market structure и developer experience.
 
+**Legal reviewers** проверяют, что текст и API-контракт не создают ложного впечатления о праве деятельности, доступности продукта или допустимости обработки данных.
+
 ## Изменения
 
 Каждое существенное изменение проходит через proposal:
@@ -18,8 +20,9 @@
 2. Proposed contract.
 3. Backward compatibility.
 4. Security impact.
-5. Conformance impact.
-6. Migration path.
+5. Legal and data-governance impact.
+6. Conformance impact.
+7. Migration path.
 
 ## Версионирование
 
@@ -41,7 +44,7 @@ Vendor-specific расширения допустимы только через 
 - `RU-DAX L1`;
 - `RU-DAX L2`;
 - `RU-DAX L3`;
-- `RU-DAX L4`.
+- `RU-DAX L4`;
+- `RU-DAX L5`.
 
 Заявление уровня должно подтверждаться conformance report.
-

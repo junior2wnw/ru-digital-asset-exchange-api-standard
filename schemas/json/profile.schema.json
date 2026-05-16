@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ru-dax:schema:profile:0.2",
+  "title": "VenueProfile",
+  "type": "object",
+  "required": [
+    "profile_id",
+    "profile_version",
+    "jurisdiction",
+    "operator_roles",
+    "compatibility_levels",
+    "capabilities",
+    "legal_profiles",
+    "data_governance",
+    "last_updated"
+  ],
+  "properties": {
+    "profile_id": {
+      "type": "string",
+      "const": "ru-dax"
+    },
+    "profile_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+(-[A-Za-z0-9.-]+)?$"
+    },
+    "jurisdiction": {
+      "type": "string",
+      "description": "Primary legal jurisdiction for the advertised profile."
+    },
+    "operator_roles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/operatorRole"
+      },
+      "uniqueItems": true
+    },
+    "compatibility_levels": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/compatibilityLevel"
+      },
+      "uniqueItems": true
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["capability_id", "level", "status"],
+        "properties": {
+          "capability_id": {
+            "$ref": "#/$defs/capabilityId"
+          },
+          "level": {
+            "$ref": "#/$defs/compatibilityLevel"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["supported", "sandbox_only", "planned", "not_supported"]
+          },
+          "description": {
+            "type": "string"
+          },
+          "extensions": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "legal_profiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["framework_id", "status", "applies_to"],
+        "properties": {
+          "framework_id": {
+            "$ref": "#/$defs/legalFrameworkId"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "applicable",
+              "requires_registration",
+              "requires_license_or_register",
+              "requires_experimental_regime",
+              "not_applicable",
+              "implementation_responsibility"
+            ]
+          },
+          "applies_to": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/capabilityId"
+            },
+            "uniqueItems": true
+          },
+          "description": {
+            "type": "string"
+          },
+          "source_url": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "data_governance": {
+      "type": "object",
+      "required": ["client_consent_required", "personal_data_policy", "audit_trail_required"],
+      "properties": {
+        "client_consent_required": {
+          "type": "boolean"
+        },
+        "personal_data_policy": {
+          "type": "string",
+          "enum": ["not_applicable", "implementation_responsibility", "documented"]
+        },
+        "audit_trail_required": {
+          "type": "boolean"
+        },
+        "retention_policy": {
+          "type": "string"
+        },
+        "extensions": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "last_updated": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "operatorRole": {
+      "type": "string",
+      "enum": [
+        "exchange",
+        "broker",
+        "bank",
+        "ois_cfa",
+        "ootsfa",
+        "custodian",
+        "wallet_provider",
+        "payment_provider",
+        "market_maker",
+        "issuer",
+        "qualified_investor_gateway",
+        "compliance_provider",
+        "analytics_provider",
+        "developer_tool",
+        "regulator_observer",
+        "mining_infrastructure_operator"
+      ]
+    },
+    "compatibilityLevel": {
+      "type": "string",
+      "enum": ["L0", "L1", "L2", "L3", "L4", "L5"]
+    },
+    "capabilityId": {
+      "type": "string",
+      "enum": [
+        "discovery",
+        "market_data",
+        "trading",
+        "wallet_custody",
+        "derivatives",
+        "fix",
+        "cfa_issuance",
+        "cfa_exchange",
+        "digital_ruble",
+        "open_api_consent",
+        "aml_kyc",
+        "tax_reporting",
+        "fx_control",
+        "regulatory_reporting",
+        "audit_export",
+        "sandbox",
+        "conformance"
+      ]
+    },
+    "legalFrameworkId": {
+      "type": "string",
+      "enum": [
+        "259-fz-cfa",
+        "161-fz-digital-ruble",
+        "115-fz-aml",
+        "152-fz-personal-data",
+        "173-fz-currency-control",
+        "258-fz-experimental-legal-regime",
+        "open-api-cbr-standards",
+        "mining-registry-tax",
+        "platform-rules",
+        "other"
+      ]
+    }
+  }
+}

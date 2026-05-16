@@ -35,6 +35,22 @@ Supported `type` values:
 - `index`;
 - `structured_product`.
 
+## Legal-Aware Instrument Fields
+
+Technical product type and legal status are separate concepts. A venue SHOULD publish law-aware fields when the instrument can be affected by jurisdiction, investor access, payment restrictions, or experimental legal regimes.
+
+Optional fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `legal_classification` | enum | `digital_currency`, `digital_financial_asset`, `hybrid_digital_right`, `foreign_digital_right`, `digital_ruble`, `security`, `derivative`, `commodity`, `fiat_currency`, or `other` |
+| `regulatory_scope` | enum | `production_ru_registered`, `experimental_legal_regime`, `foreign_market`, `sandbox`, or `implementation_defined` |
+| `investor_access` | enum | `retail`, `qualified_investor`, `specially_qualified_investor`, `institutional`, `registered_user`, `not_applicable`, or `implementation_defined` |
+| `payment_use_allowed` | boolean | Whether this instrument may be used as a payment leg in the advertised context |
+| `jurisdiction` | string | Primary jurisdiction for the advertised product view |
+
+These fields are informational for API clients. They do not replace legal review, investor classification, onboarding, platform rules, registry status, or an experimental legal regime.
+
 Supported `status` values:
 
 - `online`;
@@ -203,4 +219,3 @@ Every limit response SHOULD include:
 - maximum allowed;
 - reset time, if applicable;
 - scope.
-

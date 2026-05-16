@@ -11,6 +11,7 @@ const client = new SpreadXClient({
 });
 
 console.log(await client.time());
+console.log(await client.profile());
 console.log(await client.instruments());
 ```
 

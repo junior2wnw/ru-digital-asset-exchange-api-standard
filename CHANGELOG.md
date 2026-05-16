@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0
+
+- Added `/v1/profile` for venue roles, compatibility levels, capabilities, legal profiles, and data governance.
+- Added participant profile documentation for exchanges, brokers, banks, OIS CFA, OOTSFA, custody, wallet providers, market makers, issuers, compliance, analytics, and developer tools.
+- Added Russian legal alignment notes for CFA, digital ruble, AML/KYC, personal data, currency control, experimental legal regimes, Open API consent, and mining/tax reporting.
+- Added optional law-aware instrument fields: legal classification, regulatory scope, investor access, payment-use flag, and jurisdiction.
+- Added L5 Compliance & Reporting as the next compatibility target.
+- Updated mock exchange, OpenAPI, JSON Schema, Python SDK, TypeScript SDK, and L0 conformance tests.
+
 ## 0.1.0
 
 - Initial draft of the RU-DAX interoperability profile.

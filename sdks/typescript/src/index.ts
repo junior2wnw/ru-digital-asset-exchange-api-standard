@@ -8,6 +8,7 @@ export type {
   Position,
   PriceLevel,
   Trade,
+  VenueProfile,
   WalletAsset,
   WalletTransaction,
 } from "./types.js";

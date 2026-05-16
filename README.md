@@ -1,6 +1,6 @@
 # RU Digital Asset Exchange API Standard
 
-Draft открытого API-профиля для совместимой инфраструктуры цифровых активов, цифровой валюты и производных инструментов.
+Draft открытого API-профиля для совместимой и law-aware инфраструктуры цифровых активов, цифровой валюты, цифрового рубля, ЦФА, открытых API и производных инструментов.
 
 Проект решает простую задачу: дать рынку общий технический язык. Не монополию SDK, не “обязать всех пользоваться одной библиотекой”, не официальную позицию регулятора, а проверяемый открытый профиль: спецификации, схемы, SDK, mock exchange и conformance tests.
 
@@ -19,7 +19,7 @@ Draft открытого API-профиля для совместимой инф
 
 | Раздел | Назначение |
 | --- | --- |
-| `docs/` | White paper, позиционирование, безопасность, governance, roadmap |
+| `docs/` | White paper, позиционирование, профили участников рынка, правовое соответствие РФ, безопасность, governance, roadmap |
 | `spec/` | Технические профили REST, WebSocket, FIX, market model, wallet model |
 | `schemas/` | OpenAPI и JSON Schema для машинной совместимости |
 | `sdks/python/` | Python SDK как reference client |
@@ -56,6 +56,8 @@ Reference implementation:
 - dated futures;
 - options;
 - swaps и другие деривативы;
+- ЦФА, гибридные цифровые права и foreign digital rights как law-aware extensions;
+- цифровой рубль и открытые API как отдельные интеграционные контуры;
 - единая модель ордеров, сделок, балансов, комиссий, лимитов и ошибок;
 - wallet, deposits, withdrawals, address book, travel rule metadata;
 - custody, subaccounts, internal transfers, audit trail;
@@ -65,6 +67,7 @@ Reference implementation:
 - sandbox/testnet;
 - conformance tests;
 - reference mock exchange.
+- profile discovery через `/v1/profile`.
 
 ## Принципы
 
@@ -75,6 +78,7 @@ Reference implementation:
 5. Совместимость доказывается тестами, а не декларацией.
 6. SDK помогает внедрять профиль, но не становится обязательной монополией.
 7. Любое нормативное использование требует правовой экспертизы и отраслевого пилота.
+8. Техническая возможность в API не должна выглядеть как правовое разрешение.
 
 ## Быстрый Старт
 
@@ -105,6 +109,7 @@ from spreadx import Client
 
 client = Client("http://127.0.0.1:8080", api_key="sandbox-key")
 print(client.time())
+print(client.profile())
 print(client.instruments())
 print(client.balances())
 ```
@@ -120,6 +125,7 @@ const client = new SpreadXClient({
 });
 
 console.log(await client.time());
+console.log(await client.profile());
 console.log(await client.instruments());
 ```
 
@@ -134,6 +140,7 @@ Windows note: если репозиторий лежит в пути с кири
 | L2 | Trading | ордера, сделки, комиссии, лимиты, idempotency |
 | L3 | Wallet & Custody | депозиты, выводы, адреса, transfers, subaccounts |
 | L4 | Derivatives & FIX | positions, margin, funding, settlement, FIX-compatible profile |
+| L5 | Compliance & Reporting | consent, AML/KYC boundary, audit export, regulatory reporting profile |
 
 ## Правовая И Рыночная Линия
 
@@ -162,12 +169,15 @@ Windows note: если репозиторий лежит в пути с кири
 - разработчикам торгового, учетного и риск-менеджмент ПО;
 - отраслевым ассоциациям;
 - регуляторным и аналитическим командам.
+- ОИС ЦФА и ООЦФА;
+- операторам цифрового рубля, платежной и open API-инфраструктуры;
+- compliance, RegTech и audit-командам.
 
 ## Статус
 
-Статус репозитория: **Draft 0.1**.
+Статус репозитория: **Draft 0.2**.
 
-Это рабочий технический draft. До промышленного или нормативного использования нужны независимая правовая экспертиза, security review, отраслевое обсуждение и пилот с несколькими участниками рынка.
+Это рабочий технический draft. До промышленного или нормативного использования нужны независимая правовая экспертиза, security review, отраслевое обсуждение и пилот с несколькими участниками рынка. Для правовой рамки РФ см. `docs/RU_LEGAL_ALIGNMENT.ru.md`, для карты участников рынка - `docs/PARTICIPANT_PROFILES.ru.md`.
 
 ## Лицензия
 

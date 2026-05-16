@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 
 app = FastAPI(
     title="SpreadX Mock Exchange",
-    version="0.1.0",
+    version="0.2.0",
     description="Reference mock exchange for the RU-DAX interoperability profile draft.",
 )
 
@@ -62,6 +62,11 @@ INSTRUMENTS = [
         "min_notional": "1000",
         "fee_schedule_id": "standard",
         "risk_profile_id": "spot-standard",
+        "legal_classification": "digital_currency",
+        "regulatory_scope": "sandbox",
+        "investor_access": "implementation_defined",
+        "payment_use_allowed": False,
+        "jurisdiction": "RU",
     },
     {
         "instrument_id": "BTC-USDT-PERP",
@@ -77,6 +82,11 @@ INSTRUMENTS = [
         "min_notional": "5",
         "fee_schedule_id": "derivatives",
         "risk_profile_id": "perp-standard",
+        "legal_classification": "derivative",
+        "regulatory_scope": "sandbox",
+        "investor_access": "qualified_investor",
+        "payment_use_allowed": False,
+        "jurisdiction": "RU",
         "underlying": "BTC-USD-INDEX",
         "settlement_asset": "USDT",
         "margin_asset": "USDT",
@@ -98,6 +108,11 @@ INSTRUMENTS = [
         "min_notional": "5",
         "fee_schedule_id": "derivatives",
         "risk_profile_id": "future-standard",
+        "legal_classification": "derivative",
+        "regulatory_scope": "sandbox",
+        "investor_access": "qualified_investor",
+        "payment_use_allowed": False,
+        "jurisdiction": "RU",
         "underlying": "ETH-USD-INDEX",
         "settlement_asset": "USDT",
         "margin_asset": "USDT",
@@ -119,6 +134,11 @@ INSTRUMENTS = [
         "min_notional": "1",
         "fee_schedule_id": "options",
         "risk_profile_id": "option-standard",
+        "legal_classification": "derivative",
+        "regulatory_scope": "sandbox",
+        "investor_access": "qualified_investor",
+        "payment_use_allowed": False,
+        "jurisdiction": "RU",
         "underlying": "BTC-USD-INDEX",
         "settlement_asset": "USDT",
         "margin_asset": "USDT",
@@ -142,6 +162,11 @@ INSTRUMENTS = [
         "min_notional": "0.01",
         "fee_schedule_id": "swaps",
         "risk_profile_id": "swap-standard",
+        "legal_classification": "derivative",
+        "regulatory_scope": "sandbox",
+        "investor_access": "qualified_investor",
+        "payment_use_allowed": False,
+        "jurisdiction": "RU",
         "underlying": "BTC-ETH-INDEX",
         "settlement_asset": "ETH",
         "margin_asset": "ETH",
@@ -203,6 +228,73 @@ WITHDRAWALS: list[dict[str, object]] = []
 DEPOSITS: list[dict[str, object]] = []
 TRANSFERS: list[dict[str, object]] = []
 IDEMPOTENCY: dict[str, dict[str, object]] = {}
+
+PROFILE = {
+    "profile_id": "ru-dax",
+    "profile_version": "0.2.0",
+    "jurisdiction": "RU",
+    "operator_roles": [
+        "exchange",
+        "broker",
+        "bank",
+        "ois_cfa",
+        "ootsfa",
+        "custodian",
+        "wallet_provider",
+        "market_maker",
+        "compliance_provider",
+        "analytics_provider",
+        "developer_tool",
+    ],
+    "compatibility_levels": ["L0", "L1", "L2", "L3", "L4"],
+    "capabilities": [
+        {"capability_id": "discovery", "level": "L0", "status": "supported"},
+        {"capability_id": "sandbox", "level": "L0", "status": "supported"},
+        {"capability_id": "conformance", "level": "L0", "status": "supported"},
+        {"capability_id": "market_data", "level": "L1", "status": "supported"},
+        {"capability_id": "trading", "level": "L2", "status": "supported"},
+        {"capability_id": "wallet_custody", "level": "L3", "status": "supported"},
+        {"capability_id": "derivatives", "level": "L4", "status": "supported"},
+        {"capability_id": "fix", "level": "L4", "status": "planned"},
+        {"capability_id": "aml_kyc", "level": "L3", "status": "sandbox_only"},
+        {"capability_id": "regulatory_reporting", "level": "L5", "status": "planned"},
+    ],
+    "legal_profiles": [
+        {
+            "framework_id": "259-fz-cfa",
+            "status": "requires_license_or_register",
+            "applies_to": ["cfa_issuance", "cfa_exchange"],
+            "description": "CFA issuance and CFA exchange activity require an eligible Russian legal entity and inclusion in the relevant Bank of Russia register.",
+            "source_url": "https://www.cbr.ru/finm_infrastructure/digital_oper/",
+        },
+        {
+            "framework_id": "115-fz-aml",
+            "status": "implementation_responsibility",
+            "applies_to": ["aml_kyc", "wallet_custody", "digital_ruble"],
+            "description": "Identification, transaction monitoring, access restriction, and AML controls remain the responsibility of the regulated implementation.",
+            "source_url": "https://cbr.ru/press/event/?id=24612",
+        },
+        {
+            "framework_id": "152-fz-personal-data",
+            "status": "implementation_responsibility",
+            "applies_to": ["open_api_consent", "aml_kyc", "audit_export"],
+            "description": "Personal data processing, consent, localization, security, and incident notification are implementation responsibilities.",
+            "source_url": "https://rkn.gov.ru/",
+        },
+    ],
+    "data_governance": {
+        "client_consent_required": True,
+        "personal_data_policy": "implementation_responsibility",
+        "audit_trail_required": True,
+        "retention_policy": "Defined by the regulated venue and applicable Russian law.",
+    },
+    "last_updated": "2026-05-16T00:00:00Z",
+}
+
+
+@app.get("/v1/profile")
+def venue_profile() -> dict[str, object]:
+    return PROFILE
 
 
 @app.get("/v1/time")
