@@ -1,0 +1,383 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ru-dmip:schema:entitlements-auth:0.5",
+  "title": "EntitlementsAuthorization",
+  "$defs": {
+    "EntitlementCapabilityManifest": {
+      "type": "object",
+      "required": [
+        "profile_id",
+        "profile_version",
+        "level",
+        "supported_entitlement_types",
+        "entitlement_statuses",
+        "subject_types",
+        "authentication_methods",
+        "minimum_assurance_for_sensitive_actions",
+        "authorization_models",
+        "security_controls",
+        "sensitive_actions",
+        "prohibited_entitlement_policy",
+        "evidence_policy",
+        "audit_required"
+      ],
+      "properties": {
+        "profile_id": { "type": "string", "const": "ru-dmip-entitlements-auth" },
+        "profile_version": { "type": "string" },
+        "level": { "type": "string", "const": "L5" },
+        "supported_entitlement_types": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/EntitlementType" },
+          "uniqueItems": true
+        },
+        "entitlement_statuses": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/EntitlementStatus" },
+          "uniqueItems": true
+        },
+        "subject_types": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SubjectType" },
+          "uniqueItems": true
+        },
+        "authentication_methods": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/AuthenticationMethod" },
+          "uniqueItems": true
+        },
+        "minimum_assurance_for_sensitive_actions": {
+          "$ref": "#/$defs/AuthenticationAssurance"
+        },
+        "authorization_models": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/AuthorizationModel" },
+          "uniqueItems": true
+        },
+        "security_controls": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SecurityControl" },
+          "uniqueItems": true
+        },
+        "sensitive_actions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/EntitlementAction" },
+          "uniqueItems": true
+        },
+        "supported_scopes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "prohibited_entitlement_policy": {
+          "type": "object",
+          "required": [
+            "illegal_entitlements_rejected",
+            "infringing_terms_rejected",
+            "discriminatory_terms_rejected",
+            "lawful_basis_required"
+          ],
+          "properties": {
+            "illegal_entitlements_rejected": { "type": "boolean", "const": true },
+            "infringing_terms_rejected": { "type": "boolean", "const": true },
+            "discriminatory_terms_rejected": { "type": "boolean", "const": true },
+            "lawful_basis_required": { "type": "boolean", "const": true }
+          },
+          "additionalProperties": false
+        },
+        "evidence_policy": {
+          "type": "object",
+          "required": ["raw_documents_public_api_allowed", "hashes_supported", "protected_download_refs_supported"],
+          "properties": {
+            "raw_documents_public_api_allowed": { "type": "boolean", "const": false },
+            "hashes_supported": { "type": "boolean" },
+            "protected_download_refs_supported": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        },
+        "audit_required": { "type": "boolean", "const": true },
+        "extensions": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": false
+    },
+    "Entitlement": {
+      "type": "object",
+      "required": [
+        "entitlement_id",
+        "entitlement_type",
+        "status",
+        "holder_ref",
+        "holder_type",
+        "legal_classification",
+        "governing_framework",
+        "restrictions",
+        "evidence",
+        "authorization_policy_id",
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+        "entitlement_id": { "type": "string" },
+        "entitlement_type": { "$ref": "#/$defs/EntitlementType" },
+        "status": { "$ref": "#/$defs/EntitlementStatus" },
+        "holder_ref": { "type": "string" },
+        "holder_type": { "$ref": "#/$defs/SubjectType" },
+        "asset_ref": { "type": "string" },
+        "instrument_id": { "type": "string" },
+        "contract_ref": { "type": "string" },
+        "issuer_ref": { "type": "string" },
+        "registry_ref": { "type": "string" },
+        "legal_classification": { "type": "string" },
+        "governing_framework": { "type": "string" },
+        "quantity": { "type": "string" },
+        "unit": { "type": "string" },
+        "restrictions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Restriction" }
+        },
+        "encumbrances": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Encumbrance" }
+        },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Evidence" }
+        },
+        "authorization_policy_id": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" },
+        "extensions": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": false
+    },
+    "AuthorizationDecisionRequest": {
+      "type": "object",
+      "required": ["subject_ref", "action", "resource_ref", "requested_at"],
+      "properties": {
+        "subject_ref": { "type": "string" },
+        "subject_type": { "$ref": "#/$defs/SubjectType" },
+        "action": { "$ref": "#/$defs/EntitlementAction" },
+        "resource_ref": { "type": "string" },
+        "purpose": { "type": "string" },
+        "authentication_assurance": { "$ref": "#/$defs/AuthenticationAssurance" },
+        "scopes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "requested_at": { "type": "string", "format": "date-time" },
+        "extensions": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": false
+    },
+    "AuthorizationDecision": {
+      "type": "object",
+      "required": [
+        "decision_id",
+        "allow",
+        "action",
+        "resource_ref",
+        "reason_codes",
+        "required_assurance",
+        "audit_required",
+        "decided_at"
+      ],
+      "properties": {
+        "decision_id": { "type": "string" },
+        "allow": { "type": "boolean" },
+        "action": { "$ref": "#/$defs/EntitlementAction" },
+        "resource_ref": { "type": "string" },
+        "reason_codes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/DecisionReasonCode" }
+        },
+        "required_assurance": { "$ref": "#/$defs/AuthenticationAssurance" },
+        "step_up_required": { "type": "boolean" },
+        "dual_control_required": { "type": "boolean" },
+        "audit_required": { "type": "boolean" },
+        "decided_at": { "type": "string", "format": "date-time" },
+        "extensions": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": false
+    },
+    "Restriction": {
+      "type": "object",
+      "required": ["restriction_type", "status"],
+      "properties": {
+        "restriction_type": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "inactive", "waived", "expired"] },
+        "framework_id": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "Encumbrance": {
+      "type": "object",
+      "required": ["encumbrance_type", "status"],
+      "properties": {
+        "encumbrance_type": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "pending_release", "released", "disputed"] },
+        "beneficiary_ref": { "type": "string" },
+        "evidence_ref": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "Evidence": {
+      "type": "object",
+      "required": ["evidence_type", "evidence_ref", "verification_status"],
+      "properties": {
+        "evidence_type": { "type": "string" },
+        "evidence_ref": { "type": "string" },
+        "evidence_hash": { "type": "string" },
+        "issuer_ref": { "type": "string" },
+        "issued_at": { "type": "string", "format": "date-time" },
+        "verification_status": {
+          "type": "string",
+          "enum": ["not_checked", "verified", "failed", "expired", "revoked"]
+        },
+        "protected_download_ref": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "EntitlementType": {
+      "type": "string",
+      "enum": [
+        "digital_asset_holding",
+        "digital_financial_asset",
+        "claim_right",
+        "monetary_claim",
+        "goods_delivery_claim",
+        "service_claim",
+        "work_performance_claim",
+        "ip_exclusive_right",
+        "ip_usage_right",
+        "revenue_share_right",
+        "governance_right",
+        "voting_right",
+        "access_right",
+        "custody_right",
+        "pledge_or_encumbrance",
+        "beneficial_interest",
+        "nominee_holding",
+        "settlement_right",
+        "other_lawful_right"
+      ]
+    },
+    "EntitlementStatus": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "suspended",
+        "encumbered",
+        "pending_transfer",
+        "transferred",
+        "redeemed",
+        "expired",
+        "cancelled",
+        "disputed",
+        "blocked_by_law"
+      ]
+    },
+    "SubjectType": {
+      "type": "string",
+      "enum": [
+        "individual",
+        "legal_entity",
+        "public_entity",
+        "account",
+        "subaccount",
+        "nominee",
+        "beneficial_owner",
+        "qualified_investor_gateway",
+        "system"
+      ]
+    },
+    "AuthenticationMethod": {
+      "type": "string",
+      "enum": [
+        "api_key",
+        "request_signature",
+        "mutual_tls",
+        "oauth2_client_credentials",
+        "oauth2_authorization_code_pkce",
+        "hardware_key",
+        "webauthn",
+        "qualified_electronic_signature",
+        "trusted_federated_identity"
+      ]
+    },
+    "AuthenticationAssurance": {
+      "type": "string",
+      "enum": ["low", "substantial", "high", "qualified_signature"]
+    },
+    "AuthorizationModel": {
+      "type": "string",
+      "enum": [
+        "scopes",
+        "rbac",
+        "abac",
+        "purpose_limitation",
+        "delegated_authority",
+        "transaction_policy",
+        "dual_control",
+        "risk_based_step_up",
+        "revocation_check",
+        "consent_check"
+      ]
+    },
+    "SecurityControl": {
+      "type": "string",
+      "enum": [
+        "least_privilege",
+        "deny_by_default",
+        "separation_of_duties",
+        "mfa_for_sensitive_operations",
+        "step_up_for_entitlement_transfer",
+        "request_signing",
+        "timestamp_and_nonce",
+        "replay_protection",
+        "idempotency",
+        "tamper_evident_audit_log",
+        "key_rotation",
+        "data_minimization",
+        "masking",
+        "revocation_check",
+        "protected_exports"
+      ]
+    },
+    "EntitlementAction": {
+      "type": "string",
+      "enum": [
+        "read",
+        "create",
+        "update",
+        "transfer",
+        "encumber",
+        "release_encumbrance",
+        "redeem",
+        "delegate",
+        "revoke_delegation",
+        "audit_read",
+        "evidence_read",
+        "illegal_or_infringing_action"
+      ]
+    },
+    "DecisionReasonCode": {
+      "type": "string",
+      "enum": [
+        "allowed",
+        "blocked_by_law",
+        "missing_legal_basis",
+        "insufficient_authority",
+        "insufficient_authentication_assurance",
+        "missing_scope",
+        "step_up_required",
+        "dual_control_required",
+        "entitlement_status_blocks_action",
+        "encumbrance_blocks_action",
+        "consent_required",
+        "policy_blocked",
+        "infringing_term"
+      ]
+    }
+  }
+}

@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 
 app = FastAPI(
     title="RU-DMIP Mock Venue",
-    version="0.3.0",
+    version="0.5.0",
     description="Reference mock venue for the RU Digital Market Interoperability Profile draft.",
 )
 
@@ -35,6 +35,15 @@ def error(code: str, message: str, category: str, status_code: int) -> JSONRespo
 
 def require_api_key(x_api_key: str | None = Header(default=None)) -> None:
     if x_api_key != "sandbox-key":
+        raise Unauthorized()
+
+
+def require_entitlement_auth(
+    x_api_key: str | None = Header(default=None),
+    x_signature: str | None = Header(default=None),
+    x_timestamp: str | None = Header(default=None),
+) -> None:
+    if x_api_key != "sandbox-key" or not x_signature or not x_timestamp:
         raise Unauthorized()
 
 
@@ -231,7 +240,7 @@ IDEMPOTENCY: dict[str, dict[str, object]] = {}
 
 PROFILE = {
     "profile_id": "ru-dmip",
-    "profile_version": "0.3.0",
+    "profile_version": "0.5.0",
     "jurisdiction": "RU",
     "operator_roles": [
         "exchange",
@@ -257,6 +266,9 @@ PROFILE = {
         {"capability_id": "sandbox", "level": "L0", "status": "supported"},
         {"capability_id": "conformance", "level": "L0", "status": "supported"},
         {"capability_id": "market_data", "level": "L1", "status": "supported"},
+        {"capability_id": "execution_semantics", "level": "L2", "status": "supported"},
+        {"capability_id": "event_replay", "level": "L2", "status": "supported"},
+        {"capability_id": "synthetic_position", "level": "L2", "status": "supported"},
         {"capability_id": "trading", "level": "L2", "status": "supported"},
         {"capability_id": "wallet_custody", "level": "L3", "status": "supported"},
         {"capability_id": "derivatives", "level": "L4", "status": "supported"},
@@ -266,6 +278,10 @@ PROFILE = {
         {"capability_id": "audit_export", "level": "L5", "status": "supported"},
         {"capability_id": "regulatory_reporting", "level": "L5", "status": "supported"},
         {"capability_id": "fx_control", "level": "L5", "status": "supported"},
+        {"capability_id": "entitlements", "level": "L5", "status": "supported"},
+        {"capability_id": "strong_authentication", "level": "L5", "status": "supported"},
+        {"capability_id": "authorization_policy", "level": "L5", "status": "supported"},
+        {"capability_id": "delegated_authority", "level": "L5", "status": "supported"},
         {"capability_id": "tax_reporting", "level": "L5", "status": "planned"},
     ],
     "legal_profiles": [
@@ -311,6 +327,13 @@ PROFILE = {
             "description": "Digital-right operations connected to foreign-trade or currency-control scenarios require structured document and operation references in the authorized-bank contour.",
             "source_url": "https://www.cbr.ru/press/event/?id=23173",
         },
+        {
+            "framework_id": "63-fz-electronic-signature",
+            "status": "implementation_responsibility",
+            "applies_to": ["strong_authentication", "authorization_policy", "delegated_authority"],
+            "description": "Legally significant electronic actions may require an appropriate electronic signature, request signing, and non-repudiation controls.",
+            "source_url": "https://publication.pravo.gov.ru/Document/View/0001202504210023",
+        },
     ],
     "data_governance": {
         "client_consent_required": True,
@@ -318,7 +341,7 @@ PROFILE = {
         "audit_trail_required": True,
         "retention_policy": "Defined by the regulated venue and applicable Russian law.",
     },
-    "last_updated": "2026-05-16T00:00:00Z",
+    "last_updated": "2026-05-25T00:00:00Z",
     "extensions": {
         "aliases": ["ru-dax"],
         "public_name": "RU Digital Market Interoperability Profile",
@@ -334,6 +357,8 @@ COMPLIANCE_PROFILE = {
         "audit.events.read",
         "reports.regulatory.read",
         "fx_control.references.read",
+        "entitlements.read",
+        "entitlements.authorization.evaluate",
     ],
     "consent_required": True,
     "personal_data_public_api_allowed": False,
@@ -353,6 +378,228 @@ COMPLIANCE_PROFILE = {
         "sandbox_notice": "Reference data is synthetic and does not contain personal data.",
     },
 }
+
+ENTITLEMENT_CAPABILITIES = {
+    "profile_id": "ru-dmip-entitlements-auth",
+    "profile_version": "0.5.0",
+    "level": "L5",
+    "supported_entitlement_types": [
+        "digital_asset_holding",
+        "digital_financial_asset",
+        "claim_right",
+        "monetary_claim",
+        "goods_delivery_claim",
+        "service_claim",
+        "work_performance_claim",
+        "ip_exclusive_right",
+        "ip_usage_right",
+        "revenue_share_right",
+        "governance_right",
+        "voting_right",
+        "access_right",
+        "custody_right",
+        "pledge_or_encumbrance",
+        "beneficial_interest",
+        "nominee_holding",
+        "settlement_right",
+        "other_lawful_right",
+    ],
+    "entitlement_statuses": [
+        "draft",
+        "active",
+        "suspended",
+        "encumbered",
+        "pending_transfer",
+        "transferred",
+        "redeemed",
+        "expired",
+        "cancelled",
+        "disputed",
+        "blocked_by_law",
+    ],
+    "subject_types": [
+        "individual",
+        "legal_entity",
+        "public_entity",
+        "account",
+        "subaccount",
+        "nominee",
+        "beneficial_owner",
+        "qualified_investor_gateway",
+        "system",
+    ],
+    "authentication_methods": [
+        "api_key",
+        "request_signature",
+        "mutual_tls",
+        "oauth2_client_credentials",
+        "oauth2_authorization_code_pkce",
+        "hardware_key",
+        "webauthn",
+        "qualified_electronic_signature",
+        "trusted_federated_identity",
+    ],
+    "minimum_assurance_for_sensitive_actions": "high",
+    "authorization_models": [
+        "scopes",
+        "rbac",
+        "abac",
+        "purpose_limitation",
+        "delegated_authority",
+        "transaction_policy",
+        "dual_control",
+        "risk_based_step_up",
+        "revocation_check",
+        "consent_check",
+    ],
+    "security_controls": [
+        "least_privilege",
+        "deny_by_default",
+        "separation_of_duties",
+        "mfa_for_sensitive_operations",
+        "step_up_for_entitlement_transfer",
+        "request_signing",
+        "timestamp_and_nonce",
+        "replay_protection",
+        "idempotency",
+        "tamper_evident_audit_log",
+        "key_rotation",
+        "data_minimization",
+        "masking",
+        "revocation_check",
+        "protected_exports",
+    ],
+    "sensitive_actions": [
+        "create",
+        "update",
+        "transfer",
+        "encumber",
+        "release_encumbrance",
+        "redeem",
+        "delegate",
+        "revoke_delegation",
+        "evidence_read",
+    ],
+    "supported_scopes": [
+        "entitlements.read",
+        "entitlements.write",
+        "entitlements.transfer",
+        "entitlements.encumber",
+        "entitlements.redeem",
+        "entitlements.delegate",
+        "entitlements.evidence.read",
+        "entitlements.audit.read",
+        "entitlements.authorization.evaluate",
+    ],
+    "prohibited_entitlement_policy": {
+        "illegal_entitlements_rejected": True,
+        "infringing_terms_rejected": True,
+        "discriminatory_terms_rejected": True,
+        "lawful_basis_required": True,
+    },
+    "evidence_policy": {
+        "raw_documents_public_api_allowed": False,
+        "hashes_supported": True,
+        "protected_download_refs_supported": True,
+    },
+    "audit_required": True,
+    "extensions": {
+        "sandbox_notice": "Reference data is synthetic and does not create legal rights.",
+        "bearer_only_sensitive_actions_allowed": False,
+    },
+}
+
+ENTITLEMENTS = [
+    {
+        "entitlement_id": "entitlement_demo_cfa_holding_1",
+        "entitlement_type": "digital_financial_asset",
+        "status": "active",
+        "holder_ref": "subject_demo_hash_001",
+        "holder_type": "legal_entity",
+        "instrument_id": "BTC-RUB-SPOT",
+        "asset_ref": "asset_demo_cfa_001",
+        "issuer_ref": "issuer_demo_hash_001",
+        "registry_ref": "registry_entry_demo_001",
+        "legal_classification": "digital_financial_asset",
+        "governing_framework": "259-fz-cfa",
+        "quantity": "10",
+        "unit": "unit",
+        "restrictions": [
+            {
+                "restriction_type": "investor_access",
+                "status": "active",
+                "framework_id": "platform-rules",
+                "description": "Access is verified by the implementation before transfer.",
+            },
+            {
+                "restriction_type": "payment_use_prohibited",
+                "status": "active",
+                "framework_id": "259-fz-cfa",
+                "description": "The entitlement record must not be interpreted as permission to use digital currency as payment.",
+            },
+        ],
+        "encumbrances": [],
+        "evidence": [
+            {
+                "evidence_type": "issuance_decision",
+                "evidence_ref": "evidence_ref_demo_issuance_001",
+                "evidence_hash": "sha256:demo-issuance-decision",
+                "issuer_ref": "issuer_demo_hash_001",
+                "issued_at": "2026-05-25T00:00:00Z",
+                "verification_status": "verified",
+                "protected_download_ref": "protected_evidence_demo_001",
+            }
+        ],
+        "authorization_policy_id": "entitlement_policy_high_assurance_v1",
+        "created_at": "2026-05-25T00:00:00Z",
+        "updated_at": "2026-05-25T00:00:00Z",
+        "extensions": {
+            "contains_personal_data": False,
+            "raw_documents_included": False,
+        },
+    },
+    {
+        "entitlement_id": "entitlement_demo_claim_services_1",
+        "entitlement_type": "service_claim",
+        "status": "active",
+        "holder_ref": "subject_demo_hash_001",
+        "holder_type": "legal_entity",
+        "contract_ref": "contract_ref_demo_services_001",
+        "issuer_ref": "issuer_demo_hash_002",
+        "registry_ref": "registry_entry_demo_002",
+        "legal_classification": "claim_right",
+        "governing_framework": "platform-rules",
+        "quantity": "1",
+        "unit": "claim",
+        "restrictions": [
+            {
+                "restriction_type": "lawful_object_required",
+                "status": "active",
+                "framework_id": "platform-rules",
+                "description": "The claimed service must remain lawful and non-infringing.",
+            }
+        ],
+        "encumbrances": [],
+        "evidence": [
+            {
+                "evidence_type": "contract_reference",
+                "evidence_ref": "evidence_ref_demo_contract_001",
+                "evidence_hash": "sha256:demo-contract-reference",
+                "issuer_ref": "issuer_demo_hash_002",
+                "issued_at": "2026-05-25T00:00:00Z",
+                "verification_status": "verified",
+            }
+        ],
+        "authorization_policy_id": "entitlement_policy_high_assurance_v1",
+        "created_at": "2026-05-25T00:00:00Z",
+        "updated_at": "2026-05-25T00:00:00Z",
+        "extensions": {
+            "contains_personal_data": False,
+            "raw_documents_included": False,
+        },
+    },
+]
+
 
 CONSENTS = [
     {
@@ -418,10 +665,84 @@ REGULATORY_REPORTS = [
     }
 ]
 
+EXECUTION_CAPABILITIES = {
+    "profile_id": "ru-dmip-execution",
+    "profile_version": "0.5.0",
+    "intent_types": [
+        "single_order",
+        "basket",
+        "spread",
+        "hedge",
+        "rebalance",
+        "close_position",
+        "transfer",
+        "reporting_action",
+    ],
+    "base_states": [
+        "created",
+        "accepted",
+        "working",
+        "partially_filled",
+        "filled",
+        "cancel_requested",
+        "partially_cancelled",
+        "cancelled",
+        "expired",
+        "rejected",
+        "failed",
+    ],
+    "event_types": [
+        "intent_created",
+        "intent_accepted",
+        "intent_rejected",
+        "order_acknowledged",
+        "fill_received",
+        "cancel_requested",
+        "cancel_acknowledged",
+        "risk_blocked",
+        "state_reconciled",
+        "replay_gap_detected",
+    ],
+    "quality_statuses": ["fresh", "stale", "gap_detected", "recovered", "unknown"],
+    "contracts": {
+        "acknowledgement_models": ["sync", "async", "eventual"],
+        "fill_models": ["atomic", "partial_allowed", "best_effort"],
+        "cancel_fill_race_policy": "event_ordering_wins",
+        "stale_data_policy": "require_confirmation",
+    },
+    "risk_constraints": [
+        "max_notional",
+        "max_quantity",
+        "max_slippage",
+        "max_latency",
+        "reduce_only",
+        "position_limit",
+        "portfolio_exposure",
+        "legal_access",
+        "client_permission",
+        "freshness_required",
+    ],
+    "replay": {
+        "supported": True,
+        "sequence_policy": "gapless",
+        "gap_recovery_policy": "replay_from_sequence",
+    },
+    "idempotency": {
+        "required_for_commands": True,
+        "window": "24h",
+    },
+    "venue_specific_logic_boundary": "adapter_only",
+}
+
 
 @app.get("/v1/profile")
 def venue_profile() -> dict[str, object]:
     return PROFILE
+
+
+@app.get("/v1/entitlements/capabilities")
+def entitlement_capabilities() -> dict[str, object]:
+    return ENTITLEMENT_CAPABILITIES
 
 
 @app.get("/v1/compliance/profile", dependencies=[Depends(require_api_key)])
@@ -442,6 +763,51 @@ def compliance_audit_events(limit: int = Query(default=100, ge=1, le=1000)) -> d
 @app.get("/v1/reports/regulatory", dependencies=[Depends(require_api_key)])
 def regulatory_reports() -> dict[str, list[dict[str, object]]]:
     return {"items": REGULATORY_REPORTS}
+
+
+@app.get("/v1/entitlements", dependencies=[Depends(require_entitlement_auth)])
+def entitlements() -> dict[str, list[dict[str, object]]]:
+    return {"items": ENTITLEMENTS}
+
+
+@app.post("/v1/entitlements/authorization/evaluate", dependencies=[Depends(require_entitlement_auth)])
+def entitlement_authorization_evaluate(payload: dict[str, object]) -> dict[str, object]:
+    action = str(payload.get("action", "read"))
+    resource_ref = str(payload.get("resource_ref", "unknown"))
+    scopes = set(payload.get("scopes") or [])
+    assurance = str(payload.get("authentication_assurance", "low"))
+    sensitive_actions = set(ENTITLEMENT_CAPABILITIES["sensitive_actions"])
+    high_assurance = assurance in {"high", "qualified_signature"}
+    reason_codes: list[str] = []
+    allow = False
+    step_up_required = False
+    dual_control_required = action in {"transfer", "encumber", "redeem", "delegate"}
+
+    if action == "illegal_or_infringing_action":
+        reason_codes.extend(["blocked_by_law", "infringing_term"])
+    elif action in sensitive_actions and not high_assurance:
+        reason_codes.extend(["insufficient_authentication_assurance", "step_up_required"])
+        step_up_required = True
+    elif action == "read" and "entitlements.read" not in scopes:
+        reason_codes.append("missing_scope")
+    elif action != "read" and f"entitlements.{action}" not in scopes:
+        reason_codes.append("missing_scope")
+    else:
+        allow = True
+        reason_codes.append("allowed")
+
+    return {
+        "decision_id": f"decision_{uuid4().hex[:12]}",
+        "allow": allow,
+        "action": action,
+        "resource_ref": resource_ref,
+        "reason_codes": reason_codes,
+        "required_assurance": "high" if action in sensitive_actions else "substantial",
+        "step_up_required": step_up_required,
+        "dual_control_required": dual_control_required and allow,
+        "audit_required": True,
+        "decided_at": now(),
+    }
 
 
 @app.get("/v1/time")
@@ -512,6 +878,11 @@ def candles(instrument_id: str, interval: str, limit: int = Query(default=100, g
             }
         )
     return {"items": items}
+
+
+@app.get("/v1/execution/capabilities")
+def execution_capabilities() -> dict[str, object]:
+    return EXECUTION_CAPABILITIES
 
 
 @app.get("/v1/account/balances", dependencies=[Depends(require_api_key)])

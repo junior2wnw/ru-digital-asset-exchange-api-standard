@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ru-dmip:schema:execution:0.4",
+  "title": "UniversalExecutionSemantics",
+  "$defs": {
+    "ExecutionCapabilityManifest": {
+      "type": "object",
+      "required": [
+        "profile_id",
+        "profile_version",
+        "intent_types",
+        "base_states",
+        "event_types",
+        "quality_statuses",
+        "contracts",
+        "risk_constraints",
+        "replay",
+        "idempotency",
+        "venue_specific_logic_boundary"
+      ],
+      "properties": {
+        "profile_id": { "type": "string", "const": "ru-dmip-execution" },
+        "profile_version": { "type": "string" },
+        "intent_types": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/IntentType" },
+          "uniqueItems": true
+        },
+        "base_states": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ExecutionState" },
+          "uniqueItems": true
+        },
+        "event_types": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ExecutionEventType" },
+          "uniqueItems": true
+        },
+        "quality_statuses": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/QualityStatus" },
+          "uniqueItems": true
+        },
+        "contracts": {
+          "type": "object",
+          "required": [
+            "acknowledgement_models",
+            "fill_models",
+            "cancel_fill_race_policy",
+            "stale_data_policy"
+          ],
+          "properties": {
+            "acknowledgement_models": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["sync", "async", "eventual"] },
+              "uniqueItems": true
+            },
+            "fill_models": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["atomic", "partial_allowed", "best_effort"] },
+              "uniqueItems": true
+            },
+            "cancel_fill_race_policy": {
+              "type": "string",
+              "enum": ["event_ordering_wins", "venue_ack_wins", "requires_reconciliation"]
+            },
+            "stale_data_policy": {
+              "type": "string",
+              "enum": ["reject", "warn", "require_confirmation", "implementation_defined"]
+            }
+          },
+          "additionalProperties": false
+        },
+        "risk_constraints": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/RiskConstraintType" },
+          "uniqueItems": true
+        },
+        "replay": {
+          "type": "object",
+          "required": ["supported", "sequence_policy", "gap_recovery_policy"],
+          "properties": {
+            "supported": { "type": "boolean" },
+            "sequence_policy": {
+              "type": "string",
+              "enum": ["gapless", "monotonic_with_gaps", "snapshot_plus_delta", "implementation_defined"]
+            },
+            "gap_recovery_policy": {
+              "type": "string",
+              "enum": ["resync_snapshot", "replay_from_sequence", "manual_reconciliation", "not_supported"]
+            }
+          },
+          "additionalProperties": false
+        },
+        "idempotency": {
+          "type": "object",
+          "required": ["required_for_commands", "window"],
+          "properties": {
+            "required_for_commands": { "type": "boolean" },
+            "window": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "venue_specific_logic_boundary": {
+          "type": "string",
+          "enum": ["adapter_only", "implementation_boundary", "not_declared"]
+        },
+        "extensions": { "type": "object", "additionalProperties": true }
+      },
+      "additionalProperties": false
+    },
+    "IntentType": {
+      "type": "string",
+      "enum": [
+        "single_order",
+        "basket",
+        "spread",
+        "hedge",
+        "rebalance",
+        "close_position",
+        "transfer",
+        "reporting_action"
+      ]
+    },
+    "ExecutionState": {
+      "type": "string",
+      "enum": [
+        "created",
+        "accepted",
+        "working",
+        "partially_filled",
+        "filled",
+        "cancel_requested",
+        "partially_cancelled",
+        "cancelled",
+        "expired",
+        "rejected",
+        "failed"
+      ]
+    },
+    "ExecutionEventType": {
+      "type": "string",
+      "enum": [
+        "intent_created",
+        "intent_accepted",
+        "intent_rejected",
+        "order_acknowledged",
+        "fill_received",
+        "cancel_requested",
+        "cancel_acknowledged",
+        "risk_blocked",
+        "state_reconciled",
+        "replay_gap_detected"
+      ]
+    },
+    "QualityStatus": {
+      "type": "string",
+      "enum": ["fresh", "stale", "gap_detected", "recovered", "unknown"]
+    },
+    "RiskConstraintType": {
+      "type": "string",
+      "enum": [
+        "max_notional",
+        "max_quantity",
+        "max_slippage",
+        "max_latency",
+        "reduce_only",
+        "position_limit",
+        "portfolio_exposure",
+        "legal_access",
+        "client_permission",
+        "freshness_required"
+      ]
+    }
+  }
+}

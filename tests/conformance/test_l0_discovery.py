@@ -21,6 +21,12 @@ def test_l0_profile_endpoint(client: httpx.Client) -> None:
     assert "L5" in payload["compatibility_levels"]
     assert payload["operator_roles"]
     assert payload["capabilities"]
+    capability_ids = {item["capability_id"] for item in payload["capabilities"]}
+    assert "execution_semantics" in capability_ids
+    assert "event_replay" in capability_ids
+    assert "entitlements" in capability_ids
+    assert "strong_authentication" in capability_ids
+    assert "authorization_policy" in capability_ids
     assert payload["legal_profiles"]
     assert payload["data_governance"]["audit_trail_required"] is True
     assert "ru-dax" in payload["extensions"]["aliases"]

@@ -15,6 +15,8 @@ All timestamps use RFC 3339 UTC. All decimal values use strings.
 | `GET` | `/v1/market/orderbook` | Order book snapshot |
 | `GET` | `/v1/market/trades` | Recent public trades |
 | `GET` | `/v1/market/candles` | OHLCV candles |
+| `GET` | `/v1/execution/capabilities` | Universal execution semantics and state-machine capabilities |
+| `GET` | `/v1/entitlements/capabilities` | Entitlements, authentication, authorization, and evidence capabilities |
 | `GET` | `/v1/fees` | Public fee schedules |
 | `GET` | `/v1/limits` | Public and authenticated limits |
 
@@ -38,6 +40,8 @@ All timestamps use RFC 3339 UTC. All decimal values use strings.
 | `GET` | `/v1/compliance/consents` | Consent records and data-sharing scopes |
 | `GET` | `/v1/compliance/audit-events` | Normalized audit events |
 | `GET` | `/v1/reports/regulatory` | Regulatory report descriptors |
+| `GET` | `/v1/entitlements` | Entitlements visible to the authenticated subject |
+| `POST` | `/v1/entitlements/authorization/evaluate` | Evaluate an entitlement authorization decision without executing the action |
 
 ## Venue Profile
 
@@ -54,6 +58,41 @@ It MUST return:
 - `data_governance` for consent, personal data, retention, and audit trail responsibility.
 
 The profile does not grant legal permission. It only declares the technical and operational contract a venue is willing to expose.
+
+## Universal Execution Capabilities
+
+`GET /v1/execution/capabilities` declares how an implementation maps universal execution semantics:
+
+- supported intent types;
+- base execution states;
+- event types;
+- market-data quality statuses;
+- acknowledgement and fill models;
+- cancel/fill race policy;
+- stale-data policy;
+- replay and gap-recovery policy;
+- idempotency window;
+- boundary for venue-specific logic.
+
+This endpoint MUST NOT expose adapter internals, venue-specific endpoint names, private keys, client data, or routing preferences. It describes the execution contract, not the implementation.
+
+## Entitlements and Authorization
+
+`GET /v1/entitlements/capabilities` declares the supported entitlements and authorization controls:
+
+- entitlement types and statuses;
+- subject types;
+- authentication methods and minimum assurance for sensitive actions;
+- authorization models;
+- security controls;
+- prohibited-entitlement policy;
+- evidence and audit policy.
+
+Entitlement endpoints MUST be deny-by-default. Sensitive actions such as transfer, encumbrance, redemption, delegation, and evidence reads SHOULD require request signing, timestamp/nonce replay protection, scoped authorization, high authentication assurance, step-up, audit trail, and dual control where appropriate.
+
+`GET /v1/entitlements` MUST NOT return raw identity documents, direct personal identifiers, unmasked protected data, or protected legal documents. It SHOULD return stable references, hashes, registry references, and protected download references.
+
+`POST /v1/entitlements/authorization/evaluate` returns a decision without executing the action. It MUST include `allow`, reason codes, required assurance, step-up and audit indicators.
 
 ## L5 Compliance and Reporting
 
@@ -82,6 +121,7 @@ Private requests:
 - `X-API-Key`;
 - `X-Timestamp`;
 - `X-Signature`;
+- `X-Nonce` or equivalent replay-protection field for high-risk entitlement actions;
 - `X-Idempotency-Key` for commands;
 - `X-Request-ID`, optional.
 

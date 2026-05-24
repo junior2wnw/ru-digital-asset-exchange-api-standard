@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:ru-dmip:schema:profile:0.3",
+  "$id": "urn:ru-dmip:schema:profile:0.5",
   "title": "VenueProfile",
   "type": "object",
   "required": [
@@ -173,6 +173,9 @@
       "enum": [
         "discovery",
         "market_data",
+        "execution_semantics",
+        "event_replay",
+        "synthetic_position",
         "trading",
         "wallet_custody",
         "derivatives",
@@ -184,6 +187,10 @@
         "aml_kyc",
         "tax_reporting",
         "fx_control",
+        "entitlements",
+        "strong_authentication",
+        "authorization_policy",
+        "delegated_authority",
         "regulatory_reporting",
         "audit_export",
         "sandbox",
@@ -199,6 +206,7 @@
         "152-fz-personal-data",
         "173-fz-currency-control",
         "258-fz-experimental-legal-regime",
+        "63-fz-electronic-signature",
         "open-api-cbr-standards",
         "mining-registry-tax",
         "platform-rules",

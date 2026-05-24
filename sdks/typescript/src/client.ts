@@ -5,10 +5,15 @@ import type {
   Candle,
   ComplianceProfile,
   ConsentRecord,
+  AuthorizationDecision,
+  AuthorizationDecisionRequest,
+  ExecutionCapabilityManifest,
   Instrument,
   Order,
   Position,
   RegulatoryReport,
+  Entitlement,
+  EntitlementCapabilityManifest,
   Trade,
   VenueProfile,
   WalletAsset,
@@ -21,17 +26,20 @@ export interface SpreadXClientOptions {
   baseUrl: string;
   apiKey?: string;
   fetchImpl?: typeof fetch;
+  secureHeaders?: () => Record<string, string> | Promise<Record<string, string>>;
 }
 
 export class SpreadXClient {
   private readonly baseUrl: string;
   private readonly apiKey?: string;
   private readonly fetchImpl: typeof fetch;
+  private readonly secureHeaders?: () => Record<string, string> | Promise<Record<string, string>>;
 
   constructor(options: SpreadXClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/$/, "");
     this.apiKey = options.apiKey;
     this.fetchImpl = options.fetchImpl ?? fetch;
+    this.secureHeaders = options.secureHeaders;
   }
 
   time(): Promise<{ server_time: string }> {
@@ -69,6 +77,26 @@ export class SpreadXClient {
       query: { instrument_id: instrumentId, interval, limit },
     });
     return data.items;
+  }
+
+  executionCapabilities(): Promise<ExecutionCapabilityManifest> {
+    return this.request("GET", "/v1/execution/capabilities");
+  }
+
+  entitlementCapabilities(): Promise<EntitlementCapabilityManifest> {
+    return this.request("GET", "/v1/entitlements/capabilities");
+  }
+
+  async entitlements(): Promise<Entitlement[]> {
+    const data = await this.request<{ items: Entitlement[] }>("GET", "/v1/entitlements", { private: true });
+    return data.items;
+  }
+
+  evaluateEntitlementAuthorization(decisionRequest: AuthorizationDecisionRequest): Promise<AuthorizationDecision> {
+    return this.request("POST", "/v1/entitlements/authorization/evaluate", {
+      private: true,
+      body: decisionRequest as unknown as JsonObject,
+    });
   }
 
   async balances(): Promise<Balance[]> {
@@ -197,6 +225,7 @@ export class SpreadXClient {
     const headers: Record<string, string> = { Accept: "application/json" };
     if (options.body) headers["Content-Type"] = "application/json";
     if (options.private && this.apiKey) headers["X-API-Key"] = this.apiKey;
+    if (options.private && this.secureHeaders) Object.assign(headers, await this.secureHeaders());
     if (options.idempotencyKey) headers["X-Idempotency-Key"] = options.idempotencyKey;
 
     const response = await this.fetchImpl(url, {

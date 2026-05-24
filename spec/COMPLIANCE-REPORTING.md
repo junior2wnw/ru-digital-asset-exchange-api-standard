@@ -1,6 +1,6 @@
 # Compliance and Reporting Profile
 
-Version: Draft 0.3
+Version: Draft 0.5
 
 This profile defines the L5 compatibility layer for consent, AML/KYC boundary, audit events, regulatory reports, and currency-control references.
 

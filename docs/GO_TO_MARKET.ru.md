@@ -23,9 +23,9 @@
 
 Так проект воспринимается как инфраструктура, а не как просьба о привилегии.
 
-Более точная версия для Draft 0.3:
+Более точная версия для Draft 0.5:
 
-> Рынку нужен единый проверяемый язык взаимодействия: роли участников, capabilities, consent, AML/KYC boundary, audit events, regulatory reporting metadata и conformance tests.
+> Рынку нужен единый проверяемый язык взаимодействия: роли участников, capabilities, execution semantics, entitlements/auth, consent, AML/KYC boundary, audit events, regulatory reporting metadata и conformance tests.
 
 ## Шаг 1. Оформить Технический Draft
 
@@ -51,6 +51,8 @@
 11. Sandbox/testnet.
 12. Conformance tests.
 13. L5 Compliance & Reporting.
+14. Universal Execution Semantics.
+15. Entitlements & Authorization.
 
 ## Шаг 2. Сделать Reference Implementation
 
@@ -81,8 +83,10 @@
 5. Требования безопасности.
 6. Модель совместимости.
 7. План пилота за 6 месяцев.
-8. L5 compliance/reporting контур.
-9. Выгоды для государства, бирж, брокеров, банков, разработчиков и пользователей.
+8. Universal execution semantics.
+9. Entitlements and authorization contour.
+10. L5 compliance/reporting контур.
+11. Выгоды для государства, бирж, брокеров, банков, разработчиков и пользователей.
 
 ## Шаг 4. Вести Диалог Не С Одним Адресатом
 

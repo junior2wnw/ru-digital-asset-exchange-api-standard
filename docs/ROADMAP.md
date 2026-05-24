@@ -1,5 +1,20 @@
 # Roadmap
 
+## 0.5 Entitlements & Authorization
+
+- Add `/v1/entitlements/capabilities`.
+- Add private entitlement endpoints for entitlements and authorization decision evaluation.
+- Add entitlements, claims, evidence, authentication assurance, authorization policy, delegated authority, step-up, dual control, and prohibited-entitlement policy.
+- Add JSON Schema, OpenAPI, SDK, mock venue, Postman, and conformance coverage.
+- Keep legal validity, registry status, platform rules, contracts, and protected documents outside ordinary API responses.
+
+## 0.4 Universal Execution Semantics
+
+- Add `/v1/execution/capabilities`.
+- Add universal execution semantics spec for intents, legs, state machine, events, replay, synthetic positions, risk constraints, and market-data quality.
+- Add JSON Schema, OpenAPI, SDK, mock venue, and conformance coverage.
+- Keep connector, adapter, and venue-specific logic explicitly outside the standard.
+
 ## 0.3 L5 Compliance & Reporting
 
 - Reframe the public project name as RU Digital Market Interoperability Profile, with RU-DAX as the exchange/trading core.
@@ -27,21 +42,21 @@
 - Добавить mock venue.
 - Добавить conformance tests.
 
-## 0.4 Market Data
+## 0.6 Market Data
 
 - REST order book, trades, candles, tickers.
 - WebSocket snapshots and deltas.
 - Replay and sequence model.
 - Market data conformance tests.
 
-## 0.5 Trading
+## 0.7 Trading
 
 - Unified order lifecycle.
 - Idempotency and retry guidance.
 - Fees and limits endpoints.
 - Trading conformance tests.
 
-## 0.6 Wallet & Custody
+## 0.8 Wallet & Custody
 
 - Deposit addresses.
 - Deposit and withdrawal lifecycle.
@@ -50,7 +65,7 @@
 - Travel rule metadata profile.
 - Wallet conformance tests.
 
-## 0.7 Derivatives
+## 0.9 Derivatives
 
 - Perpetual futures.
 - Dated futures.
@@ -59,7 +74,7 @@
 - Funding, settlement, liquidation data.
 - Derivatives conformance tests.
 
-## 0.8 Institutional
+## 0.10 Institutional
 
 - FIX-compatible profile.
 - Certification checklist.
@@ -67,7 +82,7 @@
 - Security review checklist.
 - Pilot package for regulators and industry associations.
 
-## 0.9 Advanced Compliance & Reporting
+## 0.11 Advanced Compliance & Reporting
 
 - Role-specific reporting profiles for banks, OIS CFA, OOTSFA, custodians, brokers, and analytics providers.
 - JSON Schema validation for L5 report descriptors.

@@ -1,6 +1,6 @@
 # Единый открытый API-профиль для цифровой рыночной инфраструктуры
 
-Версия: Draft 0.3
+Версия: Draft 0.5
 
 Этот документ описывает независимый технический draft. Он не является нормативным актом, юридической консультацией или официальной позицией регулятора.
 
@@ -16,6 +16,8 @@
 - лимиты;
 - комиссии;
 - wallet flows;
+- entitlements, требования, полномочия, ограничения и обременения;
+- модели аутентификации и авторизации;
 - правила маржи и деривативов;
 - sandbox-поведение.
 
@@ -33,6 +35,8 @@
 
 **Пользовательский риск.** Разные статусы выводов, депозитов, ошибок и комиссий ухудшают прозрачность для пользователя.
 
+**Правовой риск.** Если право, требование, обременение или полномочие описаны неструктурированно, клиент может принять технический доступ за юридическое разрешение, а оператору сложнее доказать правомерность действия.
+
 ## 3. Международные Аналоги
 
 В традиционных рынках давно используются общие протоколы и профили:
@@ -47,7 +51,7 @@
 
 ## 4. Предлагаемая Архитектура
 
-Профиль делится на 13 модулей:
+Профиль делится на 15 модулей:
 
 1. REST API.
 2. WebSocket market data.
@@ -62,6 +66,8 @@
 11. Sandbox/testnet.
 12. Conformance tests.
 13. Compliance & Reporting: consent, AML/KYC boundary, audit events, regulatory reports, currency-control references.
+14. Universal Execution Semantics: intent, legs, execution contract, state machine, event replay, synthetic positions and risk constraints.
+15. Entitlements & Authorization: entitlements, claims, evidence, strong authentication, authorization policy and delegated authority.
 
 Архитектура разделяет контракт и реализацию:
 
@@ -79,6 +85,7 @@
 - API keys с разделением scopes;
 - подпись приватных REST-запросов;
 - timestamp и replay protection;
+- MFA, step-up и request signing для чувствительных действий с entitlements;
 - idempotency key для торговых и wallet-команд;
 - IP allowlist для институциональных клиентов;
 - WebSocket authentication challenge;
@@ -95,9 +102,10 @@
 
 - L0 Discovery: базовая доступность и единые ошибки.
 - L1 Market Data: публичные REST и WebSocket данные.
-- L2 Trading: ордера, сделки, комиссии, лимиты, idempotency.
+- L2 Trading & Execution: ордера, сделки, комиссии, лимиты, idempotency, универсальная семантика исполнения.
 - L3 Wallet & Custody: депозиты, выводы, адреса, transfers, subaccounts.
 - L4 Derivatives & FIX: позиции, маржа, funding, settlement, FIX-compatible profile.
+- L5 Compliance, Entitlements & Authorization: согласия, AML/KYC boundary, audit events, report descriptors, entitlements, аутентификация и авторизация.
 
 Площадка может внедрять уровни постепенно. Это делает стандарт строгим по контракту, но реалистичным по пути внедрения.
 
@@ -105,7 +113,7 @@
 
 **Месяц 1.** Публичный draft, базовый OpenAPI, JSON Schema, mock venue, SDK skeleton.
 
-**Месяц 2.** REST market data, trading model, wallet model, первые conformance tests.
+**Месяц 2.** REST market data, trading model, universal execution semantics, entitlements/auth profile, wallet model, первые conformance tests.
 
 **Месяц 3.** WebSocket market data и private events, расширенные SDK, Postman collection.
 
@@ -130,6 +138,8 @@
 **Для разработчиков.** Низкий порог входа: SDK, схемы, mock venue и conformance tests доступны сразу.
 
 **Для compliance и RegTech.** Машинный словарь для согласий, статусов проверки, audit trail, отчетных дескрипторов и ссылок на защищенные выгрузки.
+
+**Для issuer, ОИС и ООЦФА.** Единый способ описывать entitlements, требования, ограничения, evidence references, статусы и полномочия без раскрытия лишних документов и персональных данных.
 
 ## 9. Практическая Формула
 

@@ -83,6 +83,59 @@
       ]
     },
     {
+      "name": "Execution",
+      "item": [
+        {
+          "name": "Execution Capabilities",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/v1/execution/capabilities"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Entitlements & Authorization",
+      "item": [
+        {
+          "name": "Entitlement Capabilities",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/v1/entitlements/capabilities"
+          }
+        },
+        {
+          "name": "Entitlements",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "X-API-Key", "value": "{{apiKey}}" },
+              { "key": "X-Timestamp", "value": "2026-05-25T00:00:00Z" },
+              { "key": "X-Signature", "value": "sandbox-signature" }
+            ],
+            "url": "{{baseUrl}}/v1/entitlements"
+          }
+        },
+        {
+          "name": "Evaluate Entitlement Authorization",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-API-Key", "value": "{{apiKey}}" },
+              { "key": "X-Timestamp", "value": "2026-05-25T00:00:00Z" },
+              { "key": "X-Signature", "value": "sandbox-signature" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject_ref\": \"subject_demo_hash_001\",\n  \"subject_type\": \"legal_entity\",\n  \"action\": \"transfer\",\n  \"resource_ref\": \"entitlement_demo_cfa_holding_1\",\n  \"purpose\": \"pilot_transfer_check\",\n  \"authentication_assurance\": \"high\",\n  \"scopes\": [\"entitlements.transfer\"],\n  \"requested_at\": \"2026-05-25T00:00:00Z\"\n}"
+            },
+            "url": "{{baseUrl}}/v1/entitlements/authorization/evaluate"
+          }
+        }
+      ]
+    },
+    {
       "name": "Trading",
       "item": [
         {

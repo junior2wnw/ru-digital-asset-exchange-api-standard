@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.5.0
+
+- Added Entitlements & Authorization profile for entitlements, claims, evidence references, strong authentication, authorization policy, delegated authority, and auditability.
+- Added `/v1/entitlements/capabilities`, `/v1/entitlements`, and `/v1/entitlements/authorization/evaluate`.
+- Added entitlements JSON Schema, OpenAPI coverage, SDK methods/types, mock venue responses, Postman coverage, and conformance tests.
+- Added explicit prohibited-entitlement policy for illegal, discriminatory, infringing, or otherwise unlawful entitlements and terms.
+- Updated Russian legal alignment and participant-facing docs for secure entitlement handling under the Russian law-aware framing.
+
+## 0.4.0
+
+- Added Universal Execution Semantics as a domain-level contract rather than a connector or adapter layer.
+- Added `/v1/execution/capabilities` for intent types, state machines, event types, replay, idempotency, risk constraints, and stale-data policy.
+- Added execution JSON Schema, OpenAPI coverage, SDK methods, mock venue manifest, and conformance tests.
+- Updated positioning and standard text to keep venue-specific logic inside implementation boundaries.
+
 ## 0.3.0
 
 - Reframed the public project name as RU Digital Market Interoperability Profile, with RU-DAX retained as the exchange/trading core.

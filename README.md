@@ -61,8 +61,11 @@ Reference implementation:
 - options;
 - swaps и другие деривативы;
 - ЦФА, гибридные цифровые права и foreign digital rights как law-aware extensions;
+- entitlements, требования, полномочия, ограничения, обременения и evidence references через Entitlements & Authorization профиль;
+- сильная аутентификация, authorization policy, delegated authority, step-up и audit trail для чувствительных действий;
 - цифровой рубль и открытые API как отдельные интеграционные контуры;
 - единая модель ордеров, сделок, балансов, комиссий, лимитов и ошибок;
+- universal execution semantics: intent, legs, state machine, event stream, replay, synthetic position, risk constraints;
 - wallet, deposits, withdrawals, address book, travel rule metadata;
 - custody, subaccounts, internal transfers, audit trail;
 - market data через REST и WebSocket;
@@ -72,7 +75,7 @@ Reference implementation:
 - conformance tests;
 - reference mock venue;
 - profile discovery через `/v1/profile`;
-- L5 Compliance & Reporting: consent, AML/KYC boundary, audit events, regulatory reports, currency-control references.
+- L5 Compliance, Entitlements & Authorization: consent, AML/KYC boundary, audit events, regulatory reports, entitlements, authentication, authorization, currency-control references.
 
 ## Принципы
 
@@ -84,6 +87,7 @@ Reference implementation:
 6. SDK помогает внедрять профиль, но не становится обязательной монополией.
 7. Любое нормативное использование требует правовой экспертизы и отраслевого пилота.
 8. Техническая возможность в API не должна выглядеть как правовое разрешение.
+9. Чувствительные действия с entitlements должны быть deny-by-default и требовать сильной аутентификации, полномочий, ограничений и аудита.
 
 ## Быстрый Старт
 
@@ -115,6 +119,8 @@ from spreadx import Client
 client = Client("http://127.0.0.1:8080", api_key="sandbox-key")
 print(client.time())
 print(client.profile())
+print(client.execution_capabilities())
+print(client.entitlement_capabilities())
 print(client.instruments())
 print(client.balances())
 ```
@@ -131,6 +137,8 @@ const client = new SpreadXClient({
 
 console.log(await client.time());
 console.log(await client.profile());
+console.log(await client.executionCapabilities());
+console.log(await client.entitlementCapabilities());
 console.log(await client.instruments());
 ```
 
@@ -142,10 +150,10 @@ Windows note: если репозиторий лежит в пути с кири
 | --- | --- | --- |
 | L0 | Discovery | `/v1/profile`, `/v1/time`, `/v1/instruments`, стандартные ошибки |
 | L1 | Market Data | order book, trades, candles, WebSocket market streams |
-| L2 | Trading | ордера, сделки, комиссии, лимиты, idempotency |
+| L2 | Trading & Execution | ордера, сделки, комиссии, лимиты, idempotency, execution semantics |
 | L3 | Wallet & Custody | депозиты, выводы, адреса, transfers, subaccounts |
 | L4 | Derivatives & FIX | positions, margin, funding, settlement, FIX-compatible profile |
-| L5 | Compliance & Reporting | `/v1/compliance/*`, `/v1/reports/*`, consent, AML/KYC boundary, audit events, regulatory reports |
+| L5 | Compliance, Entitlements & Authorization | `/v1/compliance/*`, `/v1/reports/*`, `/v1/entitlements/*`, consent, AML/KYC boundary, audit events, regulatory reports, entitlements, authentication, authorization |
 
 ## Правовая И Рыночная Линия
 
@@ -180,7 +188,7 @@ Windows note: если репозиторий лежит в пути с кири
 
 ## Статус
 
-Статус репозитория: **Draft 0.3**.
+Статус репозитория: **Draft 0.5**.
 
 Это рабочий технический draft. До промышленного или нормативного использования нужны независимая правовая экспертиза, security review, отраслевое обсуждение и пилот с несколькими участниками рынка. Для правовой рамки РФ см. `docs/RU_LEGAL_ALIGNMENT.ru.md`, для карты участников рынка - `docs/PARTICIPANT_PROFILES.ru.md`.
 

@@ -13,6 +13,8 @@ RU-DAX остается названием биржевого ядра внут�
 - технический словарь;
 - REST и WebSocket профили;
 - FIX-compatible профиль;
+- universal execution semantics без привязки к коннекторам;
+- Entitlements & Authorization профиль для требований, полномочий, evidence references, сильной аутентификации и authorization decisions;
 - L5 Compliance & Reporting профиль;
 - OpenAPI и JSON Schema;
 - SDK как reference clients;
@@ -44,6 +46,14 @@ RU-DAX остается названием биржевого ядра внут�
 
 > Рынку нужен не единый поставщик технологии, а единый проверяемый язык взаимодействия: роли участников, уровни совместимости, правовые контуры, согласия, аудит, отчетность и тесты совместимости.
 
+Дополнение Draft 0.4:
+
+> Универсальность должна жить в market/execution semantics: intent, legs, state machine, event stream, replay, synthetic position, risk constraints. Любые особенности конкретной площадки должны оставаться внутри implementation boundary.
+
+Дополнение Draft 0.5:
+
+> Entitlements должны быть отдельным защищенным слоем: claims, evidence references, authentication assurance, authorization policy, delegated authority и audit trail. API не создает правовой статус сам по себе и не должен пропускать незаконные или ущемляющие конструкции.
+
 ## Как Говорить О SDK
 
 SDK не должен называться обязательным. Его роль:
@@ -61,7 +71,7 @@ SDK не должен называться обязательным. Его ро
 2. Показать риски для надзора, отчетности и участников.
 3. Показать международные аналоги.
 4. Предложить нейтральную архитектуру.
-5. Показать working draft, mock venue, L5 compliance/reporting profile и тесты.
+5. Показать working draft, mock venue, universal execution, entitlements/auth, L5 compliance/reporting profile и тесты.
 6. Предложить пилот, а не немедленную обязанность.
 
 ## GitHub Description

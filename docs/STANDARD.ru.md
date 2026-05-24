@@ -1,6 +1,6 @@
 # RU Digital Market Interoperability Profile
 
-Версия: Draft 0.3
+Версия: Draft 0.5
 
 Этот документ описывает техническое ядро RU Digital Market Interoperability Profile. RU-DAX остается биржевым ядром внутри более широкого профиля. Это не официальный нормативный акт. Слова `MUST`, `SHOULD` и `MAY` используются только для проверки заявленного уровня API-совместимости:
 
@@ -34,9 +34,11 @@
 4. WebSocket private events для клиентских событий.
 5. FIX-compatible profile для профессиональных участников.
 6. Единые модели ордеров, сделок, балансов, ошибок, комиссий и лимитов.
-7. Sandbox/testnet, совместимый с production-контрактом.
-8. L5 Compliance & Reporting профиль для согласий, AML/KYC boundary, audit events, regulatory reports и currency-control references.
-9. Conformance endpoint или публичную инструкцию для прохождения тестов.
+7. Universal Execution Semantics для intent, event, state, replay, synthetic position и risk constraints.
+8. Sandbox/testnet, совместимый с production-контрактом.
+9. Entitlements & Authorization профиль для требований, полномочий, сильной аутентификации и authorization policy.
+10. L5 Compliance & Reporting профиль для согласий, AML/KYC boundary, audit events, regulatory reports и currency-control references.
+11. Conformance endpoint или публичную инструкцию для прохождения тестов.
 
 ## 2.1 Роли Участников
 
@@ -137,6 +139,26 @@
 - `cancelled`;
 - `expired`;
 - `rejected`.
+
+## 5.1 Универсальная Семантика Исполнения
+
+Профиль SHOULD публиковать `GET /v1/execution/capabilities`.
+
+Этот endpoint описывает не коннектор и не внутреннюю реализацию, а универсальный execution contract:
+
+- поддерживаемые intent types;
+- state machine исполнения;
+- event types;
+- cancel/fill race policy;
+- stale-data policy;
+- replay и gap recovery;
+- idempotency window;
+- risk constraints;
+- boundary, где допускается venue-specific logic.
+
+Клиентская и серверная бизнес-логика SHOULD принимать решения по capabilities, состояниям, risk policy и execution contract, а не по имени площадки или внутреннему типу адаптера.
+
+Профиль считает `spread` first-class intent type. Это не пара свободных ордеров и не UI-обертка, а структурированное торговое намерение с legs, constraints, execution contract, risk policy и событиями.
 
 ## 6. Сделки
 
@@ -283,6 +305,10 @@ Private REST requests MUST включать:
 - `cfa_issuance`;
 - `cfa_exchange`;
 - `fx_control`;
+- `entitlements`;
+- `strong_authentication`;
+- `authorization_policy`;
+- `delegated_authority`;
 - `tax_reporting`;
 - `audit_export`;
 - `regulatory_reporting`.
@@ -312,3 +338,29 @@ L5 разделяет четыре уровня:
 | Reporting metadata | Состав отчетности, период, статус, правовой контур и способ защищенного получения |
 
 В российском контуре L5 должен учитывать открытые API и согласия клиента, AML/CFT, персональные данные, валютный контроль, цифровой рубль, ЦФА/ООЦФА и правила конкретной площадки.
+
+## 15. Entitlements & Authorization
+
+Профиль SHOULD публиковать `GET /v1/entitlements/capabilities`.
+
+Этот слой описывает не юридическое заключение и не самостоятельное возникновение права, а безопасный API-контракт для проверки правомочий:
+
+- типа entitlement или полномочия;
+- держателя в псевдонимизированной форме;
+- правового контура и правил площадки;
+- ограничений, обременений, статуса и evidence references;
+- требуемой аутентификации;
+- authorization policy и delegated authority;
+- audit trail и non-repudiation.
+
+Профиль MUST быть deny-by-default. Чувствительные действия с entitlements, такие как передача, обременение, погашение, делегирование или просмотр доказательств, SHOULD требовать сильную аутентификацию, подпись запроса, timestamp/nonce, replay protection, scoped authorization, step-up и audit event.
+
+Профиль MUST отклонять entitlements, условия и действия, которые являются незаконными, дискриминационными, ущемляющими неотчуждаемые права, нарушающими персональные данные или обходящими AML/KYC, investor access, валютный контроль, санкционные, договорные или платформенные ограничения.
+
+Минимальные endpoint:
+
+- `GET /v1/entitlements/capabilities` - поддерживаемые типы entitlements, authentication methods, authorization models и security controls;
+- `GET /v1/entitlements` - entitlements и полномочия, видимые аутентифицированному субъекту;
+- `POST /v1/entitlements/authorization/evaluate` - проверка допуска к действию без выполнения самого действия.
+
+Обычный ответ по entitlement SHOULD содержать ссылки на evidence, hash, registry reference и protected download reference, но не должен раскрывать сырые документы, паспортные данные, банковскую тайну, персональные данные или охраняемую тайну через обычный API-ответ.

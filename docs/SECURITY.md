@@ -19,6 +19,10 @@
 - `fix`;
 - `compliance`;
 - `reporting`;
+- `entitlements.read`;
+- `entitlements.write`;
+- `entitlements.transfer`;
+- `entitlements.authorization.evaluate`;
 - `audit`;
 - `admin`.
 
@@ -81,6 +85,8 @@ Private WebSocket sessions SHOULD использовать challenge-response:
 - изменение API keys;
 - изменение withdrawal address book;
 - изменение consent records;
+- создание, изменение, передача, обременение, погашение и делегирование прав;
+- authorization decisions по чувствительным действиям;
 - compliance decisions;
 - создание и выгрузка отчетных наборов.
 
@@ -93,8 +99,27 @@ L5 Compliance & Reporting endpoints MUST be private. Они SHOULD исполь�
 - `audit.events.read`;
 - `reports.regulatory.read`;
 - `fx_control.references.read`.
+- `entitlements.read`;
+- `entitlements.evidence.read`;
+- `entitlements.authorization.evaluate`.
 
 Публичные endpoint не должны раскрывать персональные данные, банковскую тайну, KYC-документы, внутренние scoring rules, сведения ограниченного доступа или защищенные отчетные файлы. Если клиенту нужна выгрузка, API SHOULD отдавать protected reference, checksum, retention class и delivery channel, а не сам файл в публичном контуре.
+
+## Entitlements And Authorization
+
+Чувствительные действия с entitlements MUST быть deny-by-default. Для передачи, обременения, погашения, делегирования и чтения доказательств SHOULD применяться:
+
+- request signing;
+- timestamp and nonce replay protection;
+- MFA or hardware-backed authentication;
+- step-up authentication;
+- scoped authorization;
+- delegated authority checks;
+- revocation checks;
+- dual control for high-risk actions;
+- tamper-evident audit log.
+
+Bearer-only доступ без дополнительной проверки SHOULD NOT быть достаточным для чувствительных действий с entitlements.
 
 ## Incident Compatibility
 

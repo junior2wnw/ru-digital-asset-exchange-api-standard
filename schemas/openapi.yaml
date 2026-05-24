@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
   title: RU Digital Market Interoperability Profile
-  version: 0.3.0
-  summary: Draft REST API profile for interoperable, law-aware digital market infrastructure.
+  version: 0.5.0
+  summary: Draft REST API profile for interoperable, law-aware digital market infrastructure, entitlements, and authorization.
   license:
     name: Apache-2.0
 servers:
@@ -14,6 +14,9 @@ tags:
   - name: discovery
   - name: profile
   - name: market
+  - name: execution
+  - name: entitlements
+  - name: auth
   - name: trading
   - name: account
   - name: wallet
@@ -168,6 +171,30 @@ paths:
                     type: array
                     items:
                       $ref: "#/components/schemas/Candle"
+  /v1/execution/capabilities:
+    get:
+      tags: [execution]
+      summary: Get universal execution semantics and state-machine capabilities.
+      operationId: getExecutionCapabilities
+      responses:
+        "200":
+          description: Execution capability manifest.
+          content:
+            application/json:
+              schema:
+                $ref: "./json/execution.schema.json#/$defs/ExecutionCapabilityManifest"
+  /v1/entitlements/capabilities:
+    get:
+      tags: [entitlements, auth]
+      summary: Get entitlements, authentication, authorization, and evidence capabilities.
+      operationId: getEntitlementCapabilities
+      responses:
+        "200":
+          description: Entitlement authorization capability manifest.
+          content:
+            application/json:
+              schema:
+                $ref: "./json/entitlements.schema.json#/$defs/EntitlementCapabilityManifest"
   /v1/account/balances:
     get:
       tags: [account]
@@ -510,6 +537,50 @@ paths:
                     type: array
                     items:
                       $ref: "./json/compliance.schema.json#/$defs/RegulatoryReport"
+  /v1/entitlements:
+    get:
+      tags: [entitlements]
+      security:
+        - ApiKeyAuth: []
+          RequestSignature: []
+          RequestTimestamp: []
+      summary: List entitlements visible to the authenticated subject.
+      operationId: listEntitlements
+      responses:
+        "200":
+          description: Entitlements.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "./json/entitlements.schema.json#/$defs/Entitlement"
+  /v1/entitlements/authorization/evaluate:
+    post:
+      tags: [entitlements, auth]
+      security:
+        - ApiKeyAuth: []
+          RequestSignature: []
+          RequestTimestamp: []
+      summary: Evaluate an entitlement authorization decision without executing the action.
+      operationId: evaluateEntitlementAuthorization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./json/entitlements.schema.json#/$defs/AuthorizationDecisionRequest"
+      responses:
+        "200":
+          description: Authorization decision.
+          content:
+            application/json:
+              schema:
+                $ref: "./json/entitlements.schema.json#/$defs/AuthorizationDecision"
   /v1/fees:
     get:
       tags: [reference]
@@ -552,6 +623,14 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
+    RequestSignature:
+      type: apiKey
+      in: header
+      name: X-Signature
+    RequestTimestamp:
+      type: apiKey
+      in: header
+      name: X-Timestamp
   parameters:
     InstrumentId:
       name: instrument_id

@@ -77,6 +77,23 @@ class Client:
             params={"instrument_id": instrument_id, "interval": interval, "limit": limit},
         )["items"]
 
+    def execution_capabilities(self) -> JsonObject:
+        return self._request("GET", "/v1/execution/capabilities")
+
+    def entitlement_capabilities(self) -> JsonObject:
+        return self._request("GET", "/v1/entitlements/capabilities")
+
+    def entitlements(self) -> list[JsonObject]:
+        return self._request("GET", "/v1/entitlements", private=True)["items"]
+
+    def evaluate_entitlement_authorization(self, **decision_request: Any) -> JsonObject:
+        return self._request(
+            "POST",
+            "/v1/entitlements/authorization/evaluate",
+            json_body=decision_request,
+            private=True,
+        )
+
     def balances(self) -> list[JsonObject]:
         return self._request("GET", "/v1/account/balances", private=True)["items"]
 
