@@ -205,13 +205,13 @@ class Client:
         private: bool = False,
         idempotency_key: str | None = None,
     ) -> JsonObject:
-        body = json.dumps(json_body or {}, separators=(",", ":"), sort_keys=True) if json_body else ""
+        body = json.dumps(json_body, separators=(",", ":"), sort_keys=True) if json_body is not None else ""
         headers = self._headers(method, path, params, body, private, idempotency_key)
         response = self._client.request(
             method,
             f"{self.base_url}{path}",
             params=params,
-            json=json_body,
+            content=body.encode() if json_body is not None else None,
             headers=headers,
         )
         if response.status_code >= 400:
@@ -231,6 +231,8 @@ class Client:
         idempotency_key: str | None,
     ) -> dict[str, str]:
         headers = {"Accept": "application/json"}
+        if body:
+            headers["Content-Type"] = "application/json"
         if not private:
             return headers
         if self.api_key:

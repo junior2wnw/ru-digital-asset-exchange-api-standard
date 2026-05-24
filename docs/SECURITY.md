@@ -43,6 +43,8 @@ Private REST request SHOULD подписываться по строке:
 timestamp + method + path + canonical_query + sha256(body)
 ```
 
+`canonical_query` формируется из отсортированных query-параметров. Подпись вычисляется как HMAC-SHA256 от этой строки с секретом ключа API. Sandbox использует пару `sandbox-key` / `sandbox-secret`; production MUST использовать собственные секреты, ротацию ключей и защищенное хранение.
+
 Заголовки:
 
 - `X-API-Key`;
@@ -105,9 +107,9 @@ L5 Compliance & Reporting endpoints MUST be private. Они SHOULD исполь�
 
 Публичные endpoint не должны раскрывать персональные данные, банковскую тайну, KYC-документы, внутренние scoring rules, сведения ограниченного доступа или защищенные отчетные файлы. Если клиенту нужна выгрузка, API SHOULD отдавать protected reference, checksum, retention class и delivery channel, а не сам файл в публичном контуре.
 
-## Entitlements And Authorization
+## Правомочия И Авторизация (`Entitlements And Authorization`)
 
-Чувствительные действия с entitlements MUST быть deny-by-default. Для передачи, обременения, погашения, делегирования и чтения доказательств SHOULD применяться:
+Чувствительные действия с правомочиями (`entitlements`) MUST быть deny-by-default. Для передачи, обременения, погашения, делегирования и чтения доказательств SHOULD применяться:
 
 - request signing;
 - timestamp and nonce replay protection;
@@ -119,7 +121,7 @@ L5 Compliance & Reporting endpoints MUST be private. Они SHOULD исполь�
 - dual control for high-risk actions;
 - tamper-evident audit log.
 
-Bearer-only доступ без дополнительной проверки SHOULD NOT быть достаточным для чувствительных действий с entitlements.
+Bearer-only доступ без дополнительной проверки SHOULD NOT быть достаточным для чувствительных действий с правомочиями (`entitlements`).
 
 ## Incident Compatibility
 

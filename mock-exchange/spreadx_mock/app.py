@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import hashlib
+import hmac
 from datetime import datetime, timedelta, timezone
+from urllib.parse import urlencode
 from uuid import uuid4
 
-from fastapi import Depends, FastAPI, Header, Query
+from fastapi import Depends, FastAPI, Header, Query, Request
 from fastapi.responses import JSONResponse
 
 
@@ -12,6 +15,10 @@ app = FastAPI(
     version="0.5.0",
     description="Reference mock venue for the RU Digital Market Interoperability Profile draft.",
 )
+
+SANDBOX_API_KEY = "sandbox-key"
+SANDBOX_API_SECRET = "sandbox-secret"
+SIGNATURE_WINDOW_SECONDS = 30
 
 
 def now() -> str:
@@ -34,16 +41,33 @@ def error(code: str, message: str, category: str, status_code: int) -> JSONRespo
 
 
 def require_api_key(x_api_key: str | None = Header(default=None)) -> None:
-    if x_api_key != "sandbox-key":
+    if x_api_key != SANDBOX_API_KEY:
         raise Unauthorized()
 
 
-def require_entitlement_auth(
+async def require_entitlement_auth(
+    request: Request,
     x_api_key: str | None = Header(default=None),
     x_signature: str | None = Header(default=None),
     x_timestamp: str | None = Header(default=None),
 ) -> None:
-    if x_api_key != "sandbox-key" or not x_signature or not x_timestamp:
+    if x_api_key != SANDBOX_API_KEY or not x_signature or not x_timestamp:
+        raise Unauthorized()
+    try:
+        signed_at = datetime.fromisoformat(x_timestamp.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise Unauthorized() from exc
+    if signed_at.tzinfo is None:
+        raise Unauthorized()
+    skew = abs((datetime.now(timezone.utc) - signed_at.astimezone(timezone.utc)).total_seconds())
+    if skew > SIGNATURE_WINDOW_SECONDS:
+        raise Unauthorized()
+    body = await request.body()
+    canonical_query = urlencode(sorted(request.query_params.multi_items()))
+    body_hash = hashlib.sha256(body).hexdigest()
+    payload = f"{x_timestamp}{request.method.upper()}{request.url.path}{canonical_query}{body_hash}"
+    expected = hmac.new(SANDBOX_API_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(expected, x_signature):
         raise Unauthorized()
 
 
@@ -53,7 +77,7 @@ class Unauthorized(Exception):
 
 @app.exception_handler(Unauthorized)
 async def unauthorized_handler(_, __) -> JSONResponse:
-    return error("INVALID_SIGNATURE", "Missing or invalid sandbox API key", "authentication", 401)
+    return error("INVALID_SIGNATURE", "Missing or invalid sandbox authentication", "authentication", 401)
 
 
 INSTRUMENTS = [

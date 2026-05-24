@@ -17,6 +17,13 @@ Private endpoints accept:
 X-API-Key: sandbox-key
 ```
 
+Protected entitlement endpoints additionally verify a sandbox HMAC signature:
+
+```text
+X-Timestamp: <current UTC ISO-8601 timestamp>
+X-Signature: hmac_sha256("sandbox-secret", timestamp + method + path + canonical_query + sha256(body))
+```
+
 The mock venue is intentionally deterministic and small. It exists to test SDKs, demos, Postman collections, and conformance checks.
 
 Use `GET /v1/profile` to inspect the advertised participant roles, compatibility levels, capabilities, legal profiles, and data-governance contract.

@@ -25,7 +25,7 @@
 
 Более точная версия для Draft 0.5:
 
-> Рынку нужен единый проверяемый язык взаимодействия: роли участников, capabilities, execution semantics, entitlements/auth, consent, AML/KYC boundary, audit events, regulatory reporting metadata и conformance tests.
+> Рынку нужен единый проверяемый язык взаимодействия: роли участников, capabilities, execution semantics, профиль правомочий/авторизации, consent, AML/KYC boundary, audit events, regulatory reporting metadata и conformance tests.
 
 ## Шаг 1. Оформить Технический Draft
 
@@ -52,7 +52,7 @@
 12. Conformance tests.
 13. L5 Compliance & Reporting.
 14. Universal Execution Semantics.
-15. Entitlements & Authorization.
+15. Правомочия и авторизация (`Entitlements & Authorization`).
 
 ## Шаг 2. Сделать Reference Implementation
 
@@ -84,7 +84,7 @@
 6. Модель совместимости.
 7. План пилота за 6 месяцев.
 8. Universal execution semantics.
-9. Entitlements and authorization contour.
+9. Контур правомочий и авторизации.
 10. L5 compliance/reporting контур.
 11. Выгоды для государства, бирж, брокеров, банков, разработчиков и пользователей.
 

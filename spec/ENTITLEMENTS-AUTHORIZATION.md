@@ -106,6 +106,14 @@ Supported methods may include:
 
 Sensitive entitlement actions SHOULD require high assurance and step-up authentication.
 
+For HMAC-style private REST requests, the default signing string is:
+
+```text
+timestamp + method + path + canonical_query + sha256(body)
+```
+
+`canonical_query` is the sorted URL query string. The signature is HMAC-SHA256 over that string with the API secret. Production implementations SHOULD pair this with timestamp-window checks, nonce or replay cache, key rotation, scoped keys, and secure key storage.
+
 ## Authorization
 
 Authorization SHOULD combine:

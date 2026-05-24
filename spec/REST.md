@@ -90,6 +90,8 @@ This endpoint MUST NOT expose adapter internals, venue-specific endpoint names, 
 
 Entitlement endpoints MUST be deny-by-default. Sensitive actions such as transfer, encumbrance, redemption, delegation, and evidence reads SHOULD require request signing, timestamp/nonce replay protection, scoped authorization, high authentication assurance, step-up, audit trail, and dual control where appropriate.
 
+The reference HMAC signing string is `timestamp + method + path + canonical_query + sha256(body)`. Production implementations SHOULD validate the signature, timestamp window, nonce or replay cache, key scope, and assurance level before evaluating the entitlement action.
+
 `GET /v1/entitlements` MUST NOT return raw identity documents, direct personal identifiers, unmasked protected data, or protected legal documents. It SHOULD return stable references, hashes, registry references, and protected download references.
 
 `POST /v1/entitlements/authorization/evaluate` returns a decision without executing the action. It MUST include `allow`, reason codes, required assurance, step-up and audit indicators.

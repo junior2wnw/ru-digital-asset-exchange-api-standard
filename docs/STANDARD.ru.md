@@ -36,7 +36,7 @@
 6. Единые модели ордеров, сделок, балансов, ошибок, комиссий и лимитов.
 7. Universal Execution Semantics для intent, event, state, replay, synthetic position и risk constraints.
 8. Sandbox/testnet, совместимый с production-контрактом.
-9. Entitlements & Authorization профиль для требований, полномочий, сильной аутентификации и authorization policy.
+9. Профиль правомочий и авторизации (`Entitlements & Authorization`) для требований, полномочий, сильной аутентификации и authorization policy.
 10. L5 Compliance & Reporting профиль для согласий, AML/KYC boundary, audit events, regulatory reports и currency-control references.
 11. Conformance endpoint или публичную инструкцию для прохождения тестов.
 
@@ -339,13 +339,13 @@ L5 разделяет четыре уровня:
 
 В российском контуре L5 должен учитывать открытые API и согласия клиента, AML/CFT, персональные данные, валютный контроль, цифровой рубль, ЦФА/ООЦФА и правила конкретной площадки.
 
-## 15. Entitlements & Authorization
+## 15. Правомочия И Авторизация (`Entitlements & Authorization`)
 
 Профиль SHOULD публиковать `GET /v1/entitlements/capabilities`.
 
 Этот слой описывает не юридическое заключение и не самостоятельное возникновение права, а безопасный API-контракт для проверки правомочий:
 
-- типа entitlement или полномочия;
+- типа правомочия (`entitlement`) или полномочия;
 - держателя в псевдонимизированной форме;
 - правового контура и правил площадки;
 - ограничений, обременений, статуса и evidence references;
@@ -353,14 +353,16 @@ L5 разделяет четыре уровня:
 - authorization policy и delegated authority;
 - audit trail и non-repudiation.
 
-Профиль MUST быть deny-by-default. Чувствительные действия с entitlements, такие как передача, обременение, погашение, делегирование или просмотр доказательств, SHOULD требовать сильную аутентификацию, подпись запроса, timestamp/nonce, replay protection, scoped authorization, step-up и audit event.
+Профиль MUST быть deny-by-default. Чувствительные действия с правомочиями (`entitlements`), такие как передача, обременение, погашение, делегирование или просмотр доказательств, SHOULD требовать сильную аутентификацию, подпись запроса, timestamp/nonce, replay protection, scoped authorization, step-up и audit event.
 
-Профиль MUST отклонять entitlements, условия и действия, которые являются незаконными, дискриминационными, ущемляющими неотчуждаемые права, нарушающими персональные данные или обходящими AML/KYC, investor access, валютный контроль, санкционные, договорные или платформенные ограничения.
+Для HMAC-подписи private REST запросов базовая строка подписи: `timestamp + method + path + canonical_query + sha256(body)`. Production-реализация SHOULD проверять подпись, окно timestamp, nonce или replay cache, scope ключа и требуемый уровень аутентификации до оценки действия.
+
+Профиль MUST отклонять записи правомочий (`entitlements`), условия и действия, которые являются незаконными, дискриминационными, ущемляющими неотчуждаемые права, нарушающими персональные данные или обходящими AML/KYC, investor access, валютный контроль, санкционные, договорные или платформенные ограничения.
 
 Минимальные endpoint:
 
-- `GET /v1/entitlements/capabilities` - поддерживаемые типы entitlements, authentication methods, authorization models и security controls;
-- `GET /v1/entitlements` - entitlements и полномочия, видимые аутентифицированному субъекту;
+- `GET /v1/entitlements/capabilities` - поддерживаемые типы правомочий, authentication methods, authorization models и security controls;
+- `GET /v1/entitlements` - правомочия и полномочия, видимые аутентифицированному субъекту;
 - `POST /v1/entitlements/authorization/evaluate` - проверка допуска к действию без выполнения самого действия.
 
-Обычный ответ по entitlement SHOULD содержать ссылки на evidence, hash, registry reference и protected download reference, но не должен раскрывать сырые документы, паспортные данные, банковскую тайну, персональные данные или охраняемую тайну через обычный API-ответ.
+Обычный ответ по правомочию (`entitlement`) SHOULD содержать ссылки на evidence, hash, registry reference и protected download reference, но не должен раскрывать сырые документы, паспортные данные, банковскую тайну, персональные данные или охраняемую тайну через обычный API-ответ.

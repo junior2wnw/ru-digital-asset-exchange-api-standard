@@ -61,7 +61,7 @@ Reference implementation:
 - options;
 - swaps и другие деривативы;
 - ЦФА, гибридные цифровые права и foreign digital rights как law-aware extensions;
-- entitlements, требования, полномочия, ограничения, обременения и evidence references через Entitlements & Authorization профиль;
+- правомочия (`entitlements`), требования, полномочия, ограничения, обременения и evidence references через профиль правомочий и авторизации;
 - сильная аутентификация, authorization policy, delegated authority, step-up и audit trail для чувствительных действий;
 - цифровой рубль и открытые API как отдельные интеграционные контуры;
 - единая модель ордеров, сделок, балансов, комиссий, лимитов и ошибок;
@@ -75,7 +75,7 @@ Reference implementation:
 - conformance tests;
 - reference mock venue;
 - profile discovery через `/v1/profile`;
-- L5 Compliance, Entitlements & Authorization: consent, AML/KYC boundary, audit events, regulatory reports, entitlements, authentication, authorization, currency-control references.
+- L5 Compliance, Entitlements & Authorization: consent, AML/KYC boundary, audit events, regulatory reports, правомочия (`entitlements`), authentication, authorization, currency-control references.
 
 ## Принципы
 
@@ -87,7 +87,7 @@ Reference implementation:
 6. SDK помогает внедрять профиль, но не становится обязательной монополией.
 7. Любое нормативное использование требует правовой экспертизы и отраслевого пилота.
 8. Техническая возможность в API не должна выглядеть как правовое разрешение.
-9. Чувствительные действия с entitlements должны быть deny-by-default и требовать сильной аутентификации, полномочий, ограничений и аудита.
+9. Чувствительные действия с правомочиями (`entitlements`) должны быть deny-by-default и требовать сильной аутентификации, полномочий, ограничений и аудита.
 
 ## Быстрый Старт
 
@@ -116,7 +116,7 @@ Python SDK:
 ```python
 from spreadx import Client
 
-client = Client("http://127.0.0.1:8080", api_key="sandbox-key")
+client = Client("http://127.0.0.1:8080", api_key="sandbox-key", api_secret="sandbox-secret")
 print(client.time())
 print(client.profile())
 print(client.execution_capabilities())
@@ -133,6 +133,7 @@ import { SpreadXClient } from "@spreadx/sdk";
 const client = new SpreadXClient({
   baseUrl: "http://127.0.0.1:8080",
   apiKey: "sandbox-key",
+  apiSecret: "sandbox-secret",
 });
 
 console.log(await client.time());
@@ -153,7 +154,7 @@ Windows note: если репозиторий лежит в пути с кири
 | L2 | Trading & Execution | ордера, сделки, комиссии, лимиты, idempotency, execution semantics |
 | L3 | Wallet & Custody | депозиты, выводы, адреса, transfers, subaccounts |
 | L4 | Derivatives & FIX | positions, margin, funding, settlement, FIX-compatible profile |
-| L5 | Compliance, Entitlements & Authorization | `/v1/compliance/*`, `/v1/reports/*`, `/v1/entitlements/*`, consent, AML/KYC boundary, audit events, regulatory reports, entitlements, authentication, authorization |
+| L5 | Compliance, Entitlements & Authorization | `/v1/compliance/*`, `/v1/reports/*`, `/v1/entitlements/*`, consent, AML/KYC boundary, audit events, regulatory reports, правомочия (`entitlements`), authentication, authorization |
 
 ## Правовая И Рыночная Линия
 

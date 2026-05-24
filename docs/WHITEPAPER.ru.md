@@ -16,7 +16,7 @@
 - лимиты;
 - комиссии;
 - wallet flows;
-- entitlements, требования, полномочия, ограничения и обременения;
+- правомочия (`entitlements`), требования, полномочия, ограничения и обременения;
 - модели аутентификации и авторизации;
 - правила маржи и деривативов;
 - sandbox-поведение.
@@ -67,7 +67,7 @@
 12. Conformance tests.
 13. Compliance & Reporting: consent, AML/KYC boundary, audit events, regulatory reports, currency-control references.
 14. Universal Execution Semantics: intent, legs, execution contract, state machine, event replay, synthetic positions and risk constraints.
-15. Entitlements & Authorization: entitlements, claims, evidence, strong authentication, authorization policy and delegated authority.
+15. Entitlements & Authorization: правомочия (`entitlements`), claims, evidence, strong authentication, authorization policy and delegated authority.
 
 Архитектура разделяет контракт и реализацию:
 
@@ -85,7 +85,7 @@
 - API keys с разделением scopes;
 - подпись приватных REST-запросов;
 - timestamp и replay protection;
-- MFA, step-up и request signing для чувствительных действий с entitlements;
+- MFA, step-up и request signing для чувствительных действий с правомочиями (`entitlements`);
 - idempotency key для торговых и wallet-команд;
 - IP allowlist для институциональных клиентов;
 - WebSocket authentication challenge;
@@ -105,7 +105,7 @@
 - L2 Trading & Execution: ордера, сделки, комиссии, лимиты, idempotency, универсальная семантика исполнения.
 - L3 Wallet & Custody: депозиты, выводы, адреса, transfers, subaccounts.
 - L4 Derivatives & FIX: позиции, маржа, funding, settlement, FIX-compatible profile.
-- L5 Compliance, Entitlements & Authorization: согласия, AML/KYC boundary, audit events, report descriptors, entitlements, аутентификация и авторизация.
+- L5 Compliance, Entitlements & Authorization: согласия, AML/KYC boundary, audit events, report descriptors, правомочия (`entitlements`), аутентификация и авторизация.
 
 Площадка может внедрять уровни постепенно. Это делает стандарт строгим по контракту, но реалистичным по пути внедрения.
 
@@ -113,7 +113,7 @@
 
 **Месяц 1.** Публичный draft, базовый OpenAPI, JSON Schema, mock venue, SDK skeleton.
 
-**Месяц 2.** REST market data, trading model, universal execution semantics, entitlements/auth profile, wallet model, первые conformance tests.
+**Месяц 2.** REST market data, trading model, universal execution semantics, профиль правомочий/авторизации, wallet model, первые conformance tests.
 
 **Месяц 3.** WebSocket market data и private events, расширенные SDK, Postman collection.
 
@@ -139,7 +139,7 @@
 
 **Для compliance и RegTech.** Машинный словарь для согласий, статусов проверки, audit trail, отчетных дескрипторов и ссылок на защищенные выгрузки.
 
-**Для issuer, ОИС и ООЦФА.** Единый способ описывать entitlements, требования, ограничения, evidence references, статусы и полномочия без раскрытия лишних документов и персональных данных.
+**Для issuer, ОИС и ООЦФА.** Единый способ описывать правомочия (`entitlements`), требования, ограничения, evidence references, статусы и полномочия без раскрытия лишних документов и персональных данных.
 
 ## 9. Практическая Формула
 

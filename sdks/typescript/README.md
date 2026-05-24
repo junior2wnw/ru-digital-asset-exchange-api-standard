@@ -8,6 +8,7 @@ import { SpreadXClient } from "@spreadx/sdk";
 const client = new SpreadXClient({
   baseUrl: "http://127.0.0.1:8080",
   apiKey: "sandbox-key",
+  apiSecret: "sandbox-secret",
 });
 
 console.log(await client.time());

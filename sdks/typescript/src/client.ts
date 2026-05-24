@@ -25,6 +25,7 @@ type JsonObject = Record<string, unknown>;
 export interface SpreadXClientOptions {
   baseUrl: string;
   apiKey?: string;
+  apiSecret?: string;
   fetchImpl?: typeof fetch;
   secureHeaders?: () => Record<string, string> | Promise<Record<string, string>>;
 }
@@ -32,12 +33,14 @@ export interface SpreadXClientOptions {
 export class SpreadXClient {
   private readonly baseUrl: string;
   private readonly apiKey?: string;
+  private readonly apiSecret?: string;
   private readonly fetchImpl: typeof fetch;
   private readonly secureHeaders?: () => Record<string, string> | Promise<Record<string, string>>;
 
   constructor(options: SpreadXClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/$/, "");
     this.apiKey = options.apiKey;
+    this.apiSecret = options.apiSecret;
     this.fetchImpl = options.fetchImpl ?? fetch;
     this.secureHeaders = options.secureHeaders;
   }
@@ -222,16 +225,20 @@ export class SpreadXClient {
       }
     }
 
+    const bodyPayload = options.body ? canonicalJson(options.body) : undefined;
     const headers: Record<string, string> = { Accept: "application/json" };
-    if (options.body) headers["Content-Type"] = "application/json";
+    if (bodyPayload) headers["Content-Type"] = "application/json";
     if (options.private && this.apiKey) headers["X-API-Key"] = this.apiKey;
+    if (options.private && this.apiSecret) {
+      Object.assign(headers, await signedHeaders(this.apiSecret, method, path, url, bodyPayload ?? ""));
+    }
     if (options.private && this.secureHeaders) Object.assign(headers, await this.secureHeaders());
     if (options.idempotencyKey) headers["X-Idempotency-Key"] = options.idempotencyKey;
 
     const response = await this.fetchImpl(url, {
       method,
       headers,
-      body: options.body ? JSON.stringify(options.body) : undefined,
+      body: bodyPayload,
     });
 
     const data = (await response.json()) as JsonObject;
@@ -248,4 +255,72 @@ export class SpreadXClient {
     }
     return data as T;
   }
+}
+
+function canonicalJson(value: JsonObject): string {
+  return JSON.stringify(sortJson(value));
+}
+
+function sortJson(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(sortJson);
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, nested]) => [key, sortJson(nested)]),
+    );
+  }
+  return value;
+}
+
+async function signedHeaders(
+  apiSecret: string,
+  method: string,
+  path: string,
+  url: URL,
+  body: string,
+): Promise<Record<string, string>> {
+  const timestamp = new Date().toISOString();
+  const canonicalQuery = [...url.searchParams.entries()]
+    .sort(([leftKey, leftValue], [rightKey, rightValue]) => (
+      leftKey === rightKey ? leftValue.localeCompare(rightValue) : leftKey.localeCompare(rightKey)
+    ))
+    .map(([key, value]) => new URLSearchParams([[key, value]]).toString())
+    .join("&");
+  const bodyHash = await sha256Hex(body);
+  const payload = `${timestamp}${method.toUpperCase()}${path}${canonicalQuery}${bodyHash}`;
+  return {
+    "X-Timestamp": timestamp,
+    "X-Signature": await hmacSha256Hex(apiSecret, payload),
+  };
+}
+
+async function sha256Hex(input: string): Promise<string> {
+  const digest = await subtleCrypto().digest("SHA-256", new TextEncoder().encode(input));
+  return toHex(digest);
+}
+
+async function hmacSha256Hex(secret: string, payload: string): Promise<string> {
+  const crypto = subtleCrypto();
+  const key = await crypto.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const signature = await crypto.sign("HMAC", key, new TextEncoder().encode(payload));
+  return toHex(signature);
+}
+
+function subtleCrypto(): SubtleCrypto {
+  const subtle = globalThis.crypto?.subtle;
+  if (!subtle) {
+    throw new Error("Web Crypto API is required for built-in request signing");
+  }
+  return subtle;
+}
+
+function toHex(buffer: ArrayBuffer): string {
+  return [...new Uint8Array(buffer)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }

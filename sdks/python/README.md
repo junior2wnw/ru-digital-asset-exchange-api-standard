@@ -5,7 +5,7 @@ Reference Python SDK for the RU Digital Market Interoperability Profile draft.
 ```python
 from spreadx import Client
 
-client = Client("http://127.0.0.1:8080", api_key="sandbox-key")
+client = Client("http://127.0.0.1:8080", api_key="sandbox-key", api_secret="sandbox-secret")
 print(client.time())
 print(client.profile())
 print(client.compliance_profile())
