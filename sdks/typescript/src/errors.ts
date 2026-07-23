@@ -1,4 +1,4 @@
-export class SpreadXApiError extends Error {
+export class RuDmipApiError extends Error {
   readonly code: string;
   readonly category?: string;
   readonly requestId?: string;
@@ -14,7 +14,7 @@ export class SpreadXApiError extends Error {
     details?: Record<string, unknown>;
   }) {
     super(`${args.code}: ${args.message}`);
-    this.name = "SpreadXApiError";
+    this.name = "RuDmipApiError";
     this.code = args.code;
     this.category = args.category;
     this.requestId = args.requestId;
@@ -22,4 +22,3 @@ export class SpreadXApiError extends Error {
     this.details = args.details ?? {};
   }
 }
-

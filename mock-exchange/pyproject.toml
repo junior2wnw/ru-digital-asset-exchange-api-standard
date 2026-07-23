@@ -3,9 +3,9 @@ requires = ["hatchling>=1.25"]
 build-backend = "hatchling.build"
 
 [project]
-name = "spreadx-mock-exchange"
+name = "ru-dmip-reference-sandbox"
 version = "0.5.0"
-description = "Reference mock venue for the RU Digital Market Interoperability Profile draft."
+description = "Reference sandbox for the RU Digital Market Interoperability Profile draft."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
@@ -15,4 +15,4 @@ dependencies = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["spreadx_mock"]
+packages = ["ru_dmip_mock"]

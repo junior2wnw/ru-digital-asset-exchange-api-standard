@@ -6,6 +6,10 @@ export type OperatorRole =
   | "bank"
   | "ois_cfa"
   | "ootsfa"
+  | "crypto_exchange"
+  | "digital_depository"
+  | "management_company"
+  | "organized_trading_operator"
   | "custodian"
   | "wallet_provider"
   | "payment_provider"
@@ -32,6 +36,7 @@ export type CapabilityId =
   | "fix"
   | "cfa_issuance"
   | "cfa_exchange"
+  | "crypto_circulation"
   | "digital_ruble"
   | "open_api_consent"
   | "aml_kyc"
@@ -56,10 +61,11 @@ export type LegalFrameworkId =
   | "63-fz-electronic-signature"
   | "open-api-cbr-standards"
   | "mining-registry-tax"
+  | "ru-crypto-circulation-2026"
   | "platform-rules"
   | "other";
 
-export interface VenueProfile {
+export interface ParticipantProfile {
   profile_id: "ru-dmip";
   profile_version: string;
   jurisdiction: string;

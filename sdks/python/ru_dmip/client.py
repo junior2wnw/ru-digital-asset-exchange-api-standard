@@ -3,9 +3,11 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+from collections.abc import Mapping, Sequence
 from datetime import datetime, timezone
 from typing import Any
-from urllib.parse import urlencode
+from urllib.parse import quote
+from uuid import uuid4
 
 import httpx
 
@@ -13,6 +15,18 @@ from .errors import APIError
 
 
 JsonObject = dict[str, Any]
+QueryParams = Mapping[str, Any] | Sequence[tuple[str, Any]]
+
+
+def canonicalize_query(params: QueryParams | None) -> str:
+    encoded = [
+        (quote(key, safe="~-._"), quote(value, safe="~-._"))
+        for key, value in httpx.QueryParams(params).multi_items()
+    ]
+    return "&".join(
+        f"{key}={value}"
+        for key, value in sorted(encoded)
+    )
 
 
 class Client:
@@ -105,7 +119,7 @@ class Client:
         return self._request("GET", "/v1/orders", params=params or None, private=True)["items"]
 
     def create_order(self, **order: Any) -> JsonObject:
-        idempotency_key = order.pop("idempotency_key", None)
+        idempotency_key = order.pop("idempotency_key", None) or f"rdm_{uuid4().hex}"
         return self._request(
             "POST",
             "/v1/orders",
@@ -119,7 +133,7 @@ class Client:
             "DELETE",
             f"/v1/orders/{order_id}",
             private=True,
-            idempotency_key=idempotency_key,
+            idempotency_key=idempotency_key or f"rdm_{uuid4().hex}",
         )
 
     def private_trades(self, *, instrument_id: str | None = None, limit: int = 100) -> list[JsonObject]:
@@ -143,7 +157,7 @@ class Client:
             "/v1/wallet/deposit-addresses",
             json_body={"asset_id": asset_id, "network_id": network_id},
             private=True,
-            idempotency_key=idempotency_key,
+            idempotency_key=idempotency_key or f"rdm_{uuid4().hex}",
         )
 
     def deposits(self) -> list[JsonObject]:
@@ -153,7 +167,7 @@ class Client:
         return self._request("GET", "/v1/wallet/withdrawals", private=True)["items"]
 
     def create_withdrawal(self, **withdrawal: Any) -> JsonObject:
-        idempotency_key = withdrawal.pop("idempotency_key", None)
+        idempotency_key = withdrawal.pop("idempotency_key", None) or f"rdm_{uuid4().hex}"
         return self._request(
             "POST",
             "/v1/wallet/withdrawals",
@@ -163,7 +177,7 @@ class Client:
         )
 
     def create_transfer(self, **transfer: Any) -> JsonObject:
-        idempotency_key = transfer.pop("idempotency_key", None)
+        idempotency_key = transfer.pop("idempotency_key", None) or f"rdm_{uuid4().hex}"
         return self._request(
             "POST",
             "/v1/transfers",
@@ -200,7 +214,7 @@ class Client:
         method: str,
         path: str,
         *,
-        params: dict[str, Any] | None = None,
+        params: QueryParams | None = None,
         json_body: JsonObject | None = None,
         private: bool = False,
         idempotency_key: str | None = None,
@@ -225,7 +239,7 @@ class Client:
         self,
         method: str,
         path: str,
-        params: dict[str, Any] | None,
+        params: QueryParams | None,
         body: str,
         private: bool,
         idempotency_key: str | None,
@@ -242,7 +256,7 @@ class Client:
         if idempotency_key:
             headers["X-Idempotency-Key"] = idempotency_key
         if self.api_secret:
-            canonical_query = urlencode(sorted((params or {}).items()))
+            canonical_query = canonicalize_query(params)
             body_hash = hashlib.sha256(body.encode()).hexdigest()
             payload = f"{timestamp}{method.upper()}{path}{canonical_query}{body_hash}"
             signature = hmac.new(self.api_secret.encode(), payload.encode(), hashlib.sha256).hexdigest()

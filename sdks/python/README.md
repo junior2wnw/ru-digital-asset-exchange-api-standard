@@ -1,22 +1,17 @@
-# SpreadX Python SDK
+# RU-DMIP Python Reference Client
 
-Reference Python SDK for the RU Digital Market Interoperability Profile draft.
+Небольшой читаемый клиент, повторяющий REST-контракт профиля без скрытой бизнес-логики.
 
 ```python
-from spreadx import Client
+from ru_dmip import Client
 
-client = Client("http://127.0.0.1:8080", api_key="sandbox-key", api_secret="sandbox-secret")
-print(client.time())
+client = Client(
+    "http://127.0.0.1:8080",
+    api_key="sandbox-key",
+    api_secret="sandbox-secret",
+)
+
 print(client.profile())
-print(client.compliance_profile())
-print(client.instruments())
-print(client.create_order(
-    instrument_id="BTC-RUB-SPOT",
-    side="buy",
-    type="limit",
-    quantity="0.01",
-    price="5000000",
-))
+print(client.execution_capabilities())
+print(client.entitlement_capabilities())
 ```
-
-The SDK intentionally stays small. It is a readable reference client for implementers and can grow into a production client without changing the public model.

@@ -6,7 +6,7 @@ Conformance is test-based. A venue is compatible only for the levels it passes.
 
 | Level | Name | Scope |
 | --- | --- | --- |
-| L0 | Discovery | Venue profile, time, instruments, errors |
+| L0 | Discovery | Participant profile, time, instruments, errors |
 | L1 | Market Data | REST and WebSocket market data |
 | L2 | Trading & Execution | Orders, trades, fees, limits, idempotency, execution semantics |
 | L3 | Wallet & Custody | Deposits, withdrawals, transfers, subaccounts |
@@ -51,4 +51,4 @@ Sandbox MUST use the same contract as production. Differences MAY exist only for
 - `RU-DMIP L5 Compliance & Reporting`.
 - `RU-DMIP L5 Entitlements & Authorization`.
 
-`RU-DAX` remains an acceptable alias for the exchange/trading core. New cross-market reports SHOULD use `RU-DMIP`.
+New reports MUST identify the profile as `RU-DMIP` and include the tested profile version.

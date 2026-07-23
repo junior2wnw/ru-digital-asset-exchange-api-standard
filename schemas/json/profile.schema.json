@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:ru-dmip:schema:profile:0.5",
-  "title": "VenueProfile",
+  "title": "ParticipantProfile",
   "type": "object",
   "required": [
     "profile_id",
@@ -151,6 +151,10 @@
         "bank",
         "ois_cfa",
         "ootsfa",
+        "crypto_exchange",
+        "digital_depository",
+        "management_company",
+        "organized_trading_operator",
         "custodian",
         "wallet_provider",
         "payment_provider",
@@ -182,6 +186,7 @@
         "fix",
         "cfa_issuance",
         "cfa_exchange",
+        "crypto_circulation",
         "digital_ruble",
         "open_api_consent",
         "aml_kyc",
@@ -209,6 +214,7 @@
         "63-fz-electronic-signature",
         "open-api-cbr-standards",
         "mining-registry-tax",
+        "ru-crypto-circulation-2026",
         "platform-rules",
         "other"
       ]

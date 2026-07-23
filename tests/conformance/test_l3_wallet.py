@@ -34,7 +34,7 @@ def test_l3_withdrawal_and_transfer(client: httpx.Client, auth_headers: dict[str
             "asset_id": "USDT",
             "network_id": "TRON",
             "amount": "10",
-            "address": "TSPREADXMOCKADDRESS000000000000",
+            "address": "TRUDMIPREFERENCEADDRESS000000000",
         },
     )
     assert withdrawal.status_code == 201
@@ -52,4 +52,3 @@ def test_l3_withdrawal_and_transfer(client: httpx.Client, auth_headers: dict[str
     )
     assert transfer.status_code == 201
     assert transfer.json()["status"] == "completed"
-

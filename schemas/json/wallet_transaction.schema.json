@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:ru-dax:schema:wallet-transaction:0.1",
+  "$id": "urn:ru-dmip:schema:wallet-transaction:0.1",
   "title": "WalletTransaction",
   "type": "object",
   "required": [

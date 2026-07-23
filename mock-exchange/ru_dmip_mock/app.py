@@ -2,23 +2,28 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import json
+from copy import deepcopy
 from datetime import datetime, timedelta, timezone
-from urllib.parse import urlencode
+from urllib.parse import quote
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, Header, Query, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 
 app = FastAPI(
-    title="RU-DMIP Mock Venue",
+    title="RU-DMIP Reference Sandbox",
     version="0.5.0",
-    description="Reference mock venue for the RU Digital Market Interoperability Profile draft.",
+    description="Reference sandbox for the RU Digital Market Interoperability Profile draft.",
 )
 
 SANDBOX_API_KEY = "sandbox-key"
 SANDBOX_API_SECRET = "sandbox-secret"
 SIGNATURE_WINDOW_SECONDS = 30
+SEEN_SIGNATURES: dict[str, tuple[datetime, str | None]] = {}
 
 
 def now() -> str:
@@ -40,44 +45,141 @@ def error(code: str, message: str, category: str, status_code: int) -> JSONRespo
     )
 
 
-def require_api_key(x_api_key: str | None = Header(default=None)) -> None:
-    if x_api_key != SANDBOX_API_KEY:
-        raise Unauthorized()
+def idempotency_required() -> JSONResponse:
+    return error(
+        "IDEMPOTENCY_KEY_REQUIRED",
+        "X-Idempotency-Key is required for sandbox commands",
+        "validation",
+        400,
+    )
 
 
-async def require_entitlement_auth(
+def validate_idempotency_key(idempotency_key: str | None) -> JSONResponse | None:
+    if not idempotency_key:
+        return idempotency_required()
+    if not 8 <= len(idempotency_key) <= 128:
+        return error(
+            "INVALID_IDEMPOTENCY_KEY",
+            "X-Idempotency-Key must contain between 8 and 128 characters",
+            "validation",
+            400,
+        )
+    return None
+
+
+def idempotency_fingerprint(payload: object) -> str:
+    canonical = json.dumps(payload, ensure_ascii=True, separators=(",", ":"), sort_keys=True)
+    return hashlib.sha256(canonical.encode()).hexdigest()
+
+
+def canonicalize_query(items: list[tuple[str, str]]) -> str:
+    encoded = [
+        (quote(key, safe="~-._"), quote(value, safe="~-._"))
+        for key, value in items
+    ]
+    return "&".join(
+        f"{key}={value}"
+        for key, value in sorted(encoded)
+    )
+
+
+def cached_command(
+    scope: str,
+    idempotency_key: str,
+    fingerprint: str,
+) -> dict[str, object] | JSONResponse | None:
+    cached = IDEMPOTENCY.get((scope, idempotency_key))
+    if cached is None:
+        return None
+    cached_fingerprint, cached_response = cached
+    if cached_fingerprint != fingerprint:
+        return error(
+            "IDEMPOTENCY_CONFLICT",
+            "Idempotency key was already used with a different command",
+            "conflict",
+            409,
+        )
+    return deepcopy(cached_response)
+
+
+def remember_command(
+    scope: str,
+    idempotency_key: str,
+    fingerprint: str,
+    response: dict[str, object],
+) -> None:
+    IDEMPOTENCY[(scope, idempotency_key)] = (fingerprint, deepcopy(response))
+
+
+async def require_private_auth(
     request: Request,
     x_api_key: str | None = Header(default=None),
     x_signature: str | None = Header(default=None),
     x_timestamp: str | None = Header(default=None),
+    x_idempotency_key: str | None = Header(default=None),
 ) -> None:
     if x_api_key != SANDBOX_API_KEY or not x_signature or not x_timestamp:
-        raise Unauthorized()
+        raise AuthenticationError()
     try:
         signed_at = datetime.fromisoformat(x_timestamp.replace("Z", "+00:00"))
     except ValueError as exc:
-        raise Unauthorized() from exc
+        raise AuthenticationError() from exc
     if signed_at.tzinfo is None:
-        raise Unauthorized()
-    skew = abs((datetime.now(timezone.utc) - signed_at.astimezone(timezone.utc)).total_seconds())
+        raise AuthenticationError()
+    current_time = datetime.now(timezone.utc)
+    skew = abs((current_time - signed_at.astimezone(timezone.utc)).total_seconds())
     if skew > SIGNATURE_WINDOW_SECONDS:
-        raise Unauthorized()
+        raise AuthenticationError("SIGNATURE_EXPIRED", "Sandbox request timestamp is outside the allowed window")
     body = await request.body()
-    canonical_query = urlencode(sorted(request.query_params.multi_items()))
+    canonical_query = canonicalize_query(list(request.query_params.multi_items()))
     body_hash = hashlib.sha256(body).hexdigest()
     payload = f"{x_timestamp}{request.method.upper()}{request.url.path}{canonical_query}{body_hash}"
     expected = hmac.new(SANDBOX_API_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()
     if not hmac.compare_digest(expected, x_signature):
-        raise Unauthorized()
+        raise AuthenticationError()
+
+    expired_before = current_time - timedelta(seconds=SIGNATURE_WINDOW_SECONDS)
+    for signature, (observed_at, _) in list(SEEN_SIGNATURES.items()):
+        if observed_at < expired_before:
+            del SEEN_SIGNATURES[signature]
+    previous = SEEN_SIGNATURES.get(x_signature)
+    if previous and not (x_idempotency_key and previous[1] == x_idempotency_key):
+        raise AuthenticationError("REPLAY_DETECTED", "Duplicate sandbox request signature")
+    SEEN_SIGNATURES[x_signature] = (current_time, x_idempotency_key)
 
 
-class Unauthorized(Exception):
-    pass
+class AuthenticationError(Exception):
+    def __init__(
+        self,
+        code: str = "INVALID_SIGNATURE",
+        message: str = "Missing or invalid sandbox authentication",
+    ) -> None:
+        self.code = code
+        self.message = message
 
 
-@app.exception_handler(Unauthorized)
-async def unauthorized_handler(_, __) -> JSONResponse:
-    return error("INVALID_SIGNATURE", "Missing or invalid sandbox authentication", "authentication", 401)
+@app.exception_handler(AuthenticationError)
+async def authentication_error_handler(_, exc: AuthenticationError) -> JSONResponse:
+    return error(exc.code, exc.message, "authentication", 401)
+
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_error_handler(_, __: RequestValidationError) -> JSONResponse:
+    return error("INVALID_REQUEST", "Request validation failed", "validation", 422)
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_error_handler(_, exc: StarletteHTTPException) -> JSONResponse:
+    if exc.status_code == 404:
+        return error("RESOURCE_NOT_FOUND", "Resource not found", "not_found", 404)
+    if exc.status_code == 405:
+        return error("METHOD_NOT_ALLOWED", "Method not allowed", "validation", 405)
+    return error("HTTP_ERROR", "HTTP request failed", "request", exc.status_code)
+
+
+@app.exception_handler(Exception)
+async def unhandled_error_handler(_, __: Exception) -> JSONResponse:
+    return error("INTERNAL_ERROR", "Unexpected sandbox error", "internal", 500)
 
 
 INSTRUMENTS = [
@@ -260,7 +362,7 @@ PRIVATE_TRADES: list[dict[str, object]] = []
 WITHDRAWALS: list[dict[str, object]] = []
 DEPOSITS: list[dict[str, object]] = []
 TRANSFERS: list[dict[str, object]] = []
-IDEMPOTENCY: dict[str, dict[str, object]] = {}
+IDEMPOTENCY: dict[tuple[str, str], tuple[str, dict[str, object]]] = {}
 
 PROFILE = {
     "profile_id": "ru-dmip",
@@ -272,6 +374,10 @@ PROFILE = {
         "bank",
         "ois_cfa",
         "ootsfa",
+        "crypto_exchange",
+        "digital_depository",
+        "management_company",
+        "organized_trading_operator",
         "custodian",
         "wallet_provider",
         "payment_provider",
@@ -297,6 +403,7 @@ PROFILE = {
         {"capability_id": "wallet_custody", "level": "L3", "status": "supported"},
         {"capability_id": "derivatives", "level": "L4", "status": "supported"},
         {"capability_id": "fix", "level": "L4", "status": "planned"},
+        {"capability_id": "crypto_circulation", "level": "L5", "status": "sandbox_only"},
         {"capability_id": "open_api_consent", "level": "L5", "status": "supported"},
         {"capability_id": "aml_kyc", "level": "L5", "status": "supported"},
         {"capability_id": "audit_export", "level": "L5", "status": "supported"},
@@ -315,6 +422,20 @@ PROFILE = {
             "applies_to": ["cfa_issuance", "cfa_exchange"],
             "description": "CFA issuance and CFA exchange activity require an eligible Russian legal entity and inclusion in the relevant Bank of Russia register.",
             "source_url": "https://www.cbr.ru/finm_infrastructure/digital_oper/",
+        },
+        {
+            "framework_id": "ru-crypto-circulation-2026",
+            "status": "implementation_responsibility",
+            "applies_to": [
+                "crypto_circulation",
+                "trading",
+                "wallet_custody",
+                "entitlements",
+                "aml_kyc",
+                "regulatory_reporting",
+            ],
+            "description": "The July 2026 regulatory announcement is represented for sandbox discovery only. Production eligibility, effective dates, and controls depend on the officially published act, implementing rules, and each participant's legal status. Cryptocurrency payment use is not implied.",
+            "source_url": "https://www.cbr.ru/press/event/?id=32719",
         },
         {
             "framework_id": "open-api-cbr-standards",
@@ -363,11 +484,10 @@ PROFILE = {
         "client_consent_required": True,
         "personal_data_policy": "implementation_responsibility",
         "audit_trail_required": True,
-        "retention_policy": "Defined by the regulated venue and applicable Russian law.",
+        "retention_policy": "Defined by the regulated implementation and applicable Russian law.",
     },
-    "last_updated": "2026-05-25T00:00:00Z",
+    "last_updated": "2026-07-23T00:00:00Z",
     "extensions": {
-        "aliases": ["ru-dax"],
         "public_name": "RU Digital Market Interoperability Profile",
     },
 }
@@ -760,7 +880,7 @@ EXECUTION_CAPABILITIES = {
 
 
 @app.get("/v1/profile")
-def venue_profile() -> dict[str, object]:
+def participant_profile() -> dict[str, object]:
     return PROFILE
 
 
@@ -769,32 +889,32 @@ def entitlement_capabilities() -> dict[str, object]:
     return ENTITLEMENT_CAPABILITIES
 
 
-@app.get("/v1/compliance/profile", dependencies=[Depends(require_api_key)])
+@app.get("/v1/compliance/profile", dependencies=[Depends(require_private_auth)])
 def compliance_profile() -> dict[str, object]:
     return COMPLIANCE_PROFILE
 
 
-@app.get("/v1/compliance/consents", dependencies=[Depends(require_api_key)])
+@app.get("/v1/compliance/consents", dependencies=[Depends(require_private_auth)])
 def compliance_consents() -> dict[str, list[dict[str, object]]]:
     return {"items": CONSENTS}
 
 
-@app.get("/v1/compliance/audit-events", dependencies=[Depends(require_api_key)])
+@app.get("/v1/compliance/audit-events", dependencies=[Depends(require_private_auth)])
 def compliance_audit_events(limit: int = Query(default=100, ge=1, le=1000)) -> dict[str, list[dict[str, object]]]:
     return {"items": AUDIT_EVENTS[:limit]}
 
 
-@app.get("/v1/reports/regulatory", dependencies=[Depends(require_api_key)])
+@app.get("/v1/reports/regulatory", dependencies=[Depends(require_private_auth)])
 def regulatory_reports() -> dict[str, list[dict[str, object]]]:
     return {"items": REGULATORY_REPORTS}
 
 
-@app.get("/v1/entitlements", dependencies=[Depends(require_entitlement_auth)])
+@app.get("/v1/entitlements", dependencies=[Depends(require_private_auth)])
 def entitlements() -> dict[str, list[dict[str, object]]]:
     return {"items": ENTITLEMENTS}
 
 
-@app.post("/v1/entitlements/authorization/evaluate", dependencies=[Depends(require_entitlement_auth)])
+@app.post("/v1/entitlements/authorization/evaluate", dependencies=[Depends(require_private_auth)])
 def entitlement_authorization_evaluate(payload: dict[str, object]) -> dict[str, object]:
     action = str(payload.get("action", "read"))
     resource_ref = str(payload.get("resource_ref", "unknown"))
@@ -909,19 +1029,19 @@ def execution_capabilities() -> dict[str, object]:
     return EXECUTION_CAPABILITIES
 
 
-@app.get("/v1/account/balances", dependencies=[Depends(require_api_key)])
+@app.get("/v1/account/balances", dependencies=[Depends(require_private_auth)])
 def balances() -> dict[str, list[dict[str, object]]]:
     stamped = [item | {"updated_at": now()} for item in BALS]
     return {"items": stamped}
 
 
-@app.get("/v1/account/positions", dependencies=[Depends(require_api_key)])
+@app.get("/v1/account/positions", dependencies=[Depends(require_private_auth)])
 def positions() -> dict[str, list[dict[str, object]]]:
     stamped = [item | {"updated_at": now()} for item in POSITIONS]
     return {"items": stamped}
 
 
-@app.get("/v1/orders", dependencies=[Depends(require_api_key)])
+@app.get("/v1/orders", dependencies=[Depends(require_private_auth)])
 def list_orders(instrument_id: str | None = None, status: str | None = None) -> dict[str, list[dict[str, object]]]:
     items = [
         item
@@ -932,10 +1052,15 @@ def list_orders(instrument_id: str | None = None, status: str | None = None) -> 
     return {"items": items}
 
 
-@app.post("/v1/orders", status_code=201, dependencies=[Depends(require_api_key)], response_model=None)
+@app.post("/v1/orders", status_code=201, dependencies=[Depends(require_private_auth)], response_model=None)
 def create_order(payload: dict[str, object], x_idempotency_key: str | None = Header(default=None)) -> dict[str, object] | JSONResponse:
-    if x_idempotency_key and x_idempotency_key in IDEMPOTENCY:
-        return IDEMPOTENCY[x_idempotency_key]
+    if validation_error := validate_idempotency_key(x_idempotency_key):
+        return validation_error
+    assert x_idempotency_key is not None
+    fingerprint = idempotency_fingerprint(payload)
+    cached = cached_command("orders:create", x_idempotency_key, fingerprint)
+    if cached is not None:
+        return cached
     required = {"instrument_id", "side", "type", "quantity"}
     if missing := required - payload.keys():
         return error("INVALID_REQUEST", f"Missing fields: {', '.join(sorted(missing))}", "validation", 400)
@@ -957,32 +1082,36 @@ def create_order(payload: dict[str, object], x_idempotency_key: str | None = Hea
         "updated_at": now(),
     }
     ORDERS.append(order)
-    if x_idempotency_key:
-        IDEMPOTENCY[x_idempotency_key] = order
+    remember_command("orders:create", x_idempotency_key, fingerprint, order)
     return order
 
 
-@app.delete("/v1/orders/{order_id}", dependencies=[Depends(require_api_key)], response_model=None)
+@app.delete("/v1/orders/{order_id}", dependencies=[Depends(require_private_auth)], response_model=None)
 def cancel_order(order_id: str, x_idempotency_key: str | None = Header(default=None)) -> dict[str, object] | JSONResponse:
-    if x_idempotency_key and x_idempotency_key in IDEMPOTENCY:
-        return IDEMPOTENCY[x_idempotency_key]
+    if validation_error := validate_idempotency_key(x_idempotency_key):
+        return validation_error
+    assert x_idempotency_key is not None
+    scope = f"orders:cancel:{order_id}"
+    fingerprint = idempotency_fingerprint({"order_id": order_id})
+    cached = cached_command(scope, x_idempotency_key, fingerprint)
+    if cached is not None:
+        return cached
     for order in ORDERS:
         if order["exchange_order_id"] == order_id:
             order["status"] = "cancelled"
             order["updated_at"] = now()
-            if x_idempotency_key:
-                IDEMPOTENCY[x_idempotency_key] = order
+            remember_command(scope, x_idempotency_key, fingerprint, order)
             return order
     return error("RESOURCE_NOT_FOUND", "Order not found", "not_found", 404)
 
 
-@app.get("/v1/trades", dependencies=[Depends(require_api_key)])
+@app.get("/v1/trades", dependencies=[Depends(require_private_auth)])
 def private_trades(instrument_id: str | None = None, limit: int = Query(default=100, ge=1, le=1000)) -> dict[str, list[dict[str, object]]]:
     items = [item for item in PRIVATE_TRADES if instrument_id is None or item["instrument_id"] == instrument_id]
     return {"items": items[:limit]}
 
 
-@app.get("/v1/wallet/assets", dependencies=[Depends(require_api_key)])
+@app.get("/v1/wallet/assets", dependencies=[Depends(require_private_auth)])
 def wallet_assets() -> dict[str, list[dict[str, object]]]:
     return {
         "items": [
@@ -1021,35 +1150,59 @@ def wallet_assets() -> dict[str, list[dict[str, object]]]:
     }
 
 
-@app.post("/v1/wallet/deposit-addresses", dependencies=[Depends(require_api_key)])
-def create_deposit_address(payload: dict[str, object], x_idempotency_key: str | None = Header(default=None)) -> dict[str, object]:
-    if x_idempotency_key and x_idempotency_key in IDEMPOTENCY:
-        return IDEMPOTENCY[x_idempotency_key]
+@app.post(
+    "/v1/wallet/deposit-addresses",
+    dependencies=[Depends(require_private_auth)],
+    response_model=None,
+)
+def create_deposit_address(
+    payload: dict[str, object],
+    x_idempotency_key: str | None = Header(default=None),
+) -> dict[str, object] | JSONResponse:
+    if validation_error := validate_idempotency_key(x_idempotency_key):
+        return validation_error
+    assert x_idempotency_key is not None
+    fingerprint = idempotency_fingerprint(payload)
+    cached = cached_command("wallet:deposit-address", x_idempotency_key, fingerprint)
+    if cached is not None:
+        return cached
     response = {
         "asset_id": payload.get("asset_id", "USDT"),
         "network_id": payload.get("network_id", "TRON"),
-        "address": "TSPREADXMOCKADDRESS000000000000",
+        "address": "TRUDMIPREFERENCEADDRESS000000000",
         "memo": None,
     }
-    if x_idempotency_key:
-        IDEMPOTENCY[x_idempotency_key] = response
+    remember_command("wallet:deposit-address", x_idempotency_key, fingerprint, response)
     return response
 
 
-@app.get("/v1/wallet/deposits", dependencies=[Depends(require_api_key)])
+@app.get("/v1/wallet/deposits", dependencies=[Depends(require_private_auth)])
 def list_deposits() -> dict[str, list[dict[str, object]]]:
     return {"items": DEPOSITS}
 
 
-@app.get("/v1/wallet/withdrawals", dependencies=[Depends(require_api_key)])
+@app.get("/v1/wallet/withdrawals", dependencies=[Depends(require_private_auth)])
 def list_withdrawals() -> dict[str, list[dict[str, object]]]:
     return {"items": WITHDRAWALS}
 
 
-@app.post("/v1/wallet/withdrawals", status_code=201, dependencies=[Depends(require_api_key)])
-def create_withdrawal(payload: dict[str, object], x_idempotency_key: str | None = Header(default=None)) -> dict[str, object]:
-    if x_idempotency_key and x_idempotency_key in IDEMPOTENCY:
-        return IDEMPOTENCY[x_idempotency_key]
+@app.post(
+    "/v1/wallet/withdrawals",
+    status_code=201,
+    dependencies=[Depends(require_private_auth)],
+    response_model=None,
+)
+def create_withdrawal(
+    payload: dict[str, object],
+    x_idempotency_key: str | None = Header(default=None),
+) -> dict[str, object] | JSONResponse:
+    if validation_error := validate_idempotency_key(x_idempotency_key):
+        return validation_error
+    assert x_idempotency_key is not None
+    fingerprint = idempotency_fingerprint(payload)
+    cached = cached_command("wallet:withdrawal", x_idempotency_key, fingerprint)
+    if cached is not None:
+        return cached
     withdrawal = {
         "wallet_transaction_id": f"wdr_{uuid4().hex[:12]}",
         "type": "withdrawal",
@@ -1065,15 +1218,27 @@ def create_withdrawal(payload: dict[str, object], x_idempotency_key: str | None 
         "updated_at": now(),
     }
     WITHDRAWALS.append(withdrawal)
-    if x_idempotency_key:
-        IDEMPOTENCY[x_idempotency_key] = withdrawal
+    remember_command("wallet:withdrawal", x_idempotency_key, fingerprint, withdrawal)
     return withdrawal
 
 
-@app.post("/v1/transfers", status_code=201, dependencies=[Depends(require_api_key)])
-def create_transfer(payload: dict[str, object], x_idempotency_key: str | None = Header(default=None)) -> dict[str, object]:
-    if x_idempotency_key and x_idempotency_key in IDEMPOTENCY:
-        return IDEMPOTENCY[x_idempotency_key]
+@app.post(
+    "/v1/transfers",
+    status_code=201,
+    dependencies=[Depends(require_private_auth)],
+    response_model=None,
+)
+def create_transfer(
+    payload: dict[str, object],
+    x_idempotency_key: str | None = Header(default=None),
+) -> dict[str, object] | JSONResponse:
+    if validation_error := validate_idempotency_key(x_idempotency_key):
+        return validation_error
+    assert x_idempotency_key is not None
+    fingerprint = idempotency_fingerprint(payload)
+    cached = cached_command("wallet:transfer", x_idempotency_key, fingerprint)
+    if cached is not None:
+        return cached
     transfer = {
         "wallet_transaction_id": f"trf_{uuid4().hex[:12]}",
         "type": "transfer",
@@ -1086,8 +1251,7 @@ def create_transfer(payload: dict[str, object], x_idempotency_key: str | None = 
         "updated_at": now(),
     }
     TRANSFERS.append(transfer)
-    if x_idempotency_key:
-        IDEMPOTENCY[x_idempotency_key] = transfer
+    remember_command("wallet:transfer", x_idempotency_key, fingerprint, transfer)
     return transfer
 
 

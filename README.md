@@ -1,198 +1,149 @@
 # RU Digital Market Interoperability Profile
 
-Draft открытого API-профиля для совместимой и law-aware инфраструктуры цифрового финансового рынка: ЦФА, цифровой валюты, цифрового рубля, открытых API, custody, брокерских, биржевых, отчетных и производных контуров.
+**RU-DMIP** is an open, testable API profile for digital market infrastructure.
 
-Проект решает простую задачу: дать рынку общий технический язык. Не монополию SDK, не “обязать всех пользоваться одной библиотекой”, не официальную позицию регулятора, а проверяемый открытый профиль: спецификации, схемы, SDK, mock venue и conformance tests.
+Он задает общий контракт для подключения торговых площадок, банков, брокеров, операторов цифровых активов, кастодиальных и учетных систем, поставщиков данных и разработчиков. В центре проекта не конкретная платформа, а повторно используемая семантика: как обнаружить возможности участника, передать команду, проследить исполнение, проверить полномочия и подтвердить совместимость.
 
-## Короткая Формула
+> Статус: **Draft 0.5 для технической оценки и пилотов**. Проект не является нормативным актом, лицензией, заключением о допустимости продукта или позицией государственного органа.
 
-Если государство или рынок выбирают курс на единый открытый API, то:
+## Что решает профиль
 
-1. закон или акт регулятора фиксирует принцип совместимости;
-2. технические требования утверждаются после отраслевого и юридического обсуждения;
-3. открытый draft, SDK и тесты становятся готовой отправной точкой для пилота;
-4. участники рынка внедряют совместимость не по презентации, а по conformance tests.
+Без общего контракта каждая интеграция заново определяет идентификаторы, статусы, ошибки, подпись запросов, правила повторов, события исполнения, кошельковые операции и отчетные данные. RU-DMIP выносит повторяющуюся часть в открытые спецификации и проверяет ее автоматически.
 
-Этот репозиторий не является нормативным актом и не связан с Банком России, Госдумой или иной государственной организацией. Это независимая open-source инициатива и технический draft.
+| Контур | Общий контракт | Проверка |
+| --- | --- | --- |
+| Discovery | роли, capabilities, версии и правовые границы | `/v1/profile` и L0 tests |
+| Market data | инструменты, стакан, сделки и свечи | REST schemas и L1 tests |
+| Trading & execution | заявки, idempotency, состояния, события и replay | L2 tests |
+| Wallet & custody | активы, адреса, ввод, вывод и transfers | L3 tests |
+| Derivatives | позиции, маржа, funding и settlement | L4 tests |
+| Compliance | согласия, audit events и report descriptors | L5 tests |
+| Entitlements | правомочия, доказательства и authorization decisions | L5 tests |
 
-## Что Внутри
+Профиль не требует одинаковой внутренней архитектуры. Реализация публикует поддерживаемые возможности, а клиент строит поведение по контракту и capabilities, а не по имени поставщика.
 
-| Раздел | Назначение |
-| --- | --- |
-| `docs/` | White paper, позиционирование, профили участников рынка, правовое соответствие РФ, безопасность, governance, roadmap |
-| `spec/` | Технические профили REST, WebSocket, FIX, market model, wallet model, compliance and reporting |
-| `schemas/` | OpenAPI и JSON Schema для машинной совместимости |
-| `sdks/python/` | Python SDK как reference client |
-| `sdks/typescript/` | TypeScript SDK как reference client |
-| `mock-exchange/` | Reference mock venue для sandbox и локальных тестов |
-| `tests/conformance/` | Conformance test suite для проверки совместимости |
-| `postman/` | Postman collection для ручной проверки |
-| `submissions/` | Пакет обращений, приложение и DOCX/HTML для подачи предложения |
-| `docs/GITHUB_ACTIONS_CI.example.yml` | Шаблон CI для включения после выдачи GitHub `workflow` scope |
+## Что уже есть
 
-## Как Это Называть
+- OpenAPI и JSON Schema;
+- REST, WebSocket и FIX-compatible спецификации;
+- Python и TypeScript reference clients;
+- локальный reference sandbox;
+- Postman collection;
+- 28 conformance-проверок уровней L0-L5;
+- отдельные профили исполнения, безопасности, compliance и правомочий;
+- правовые границы для применения в российском контуре.
 
-Техническое название верхнего уровня:
+## Проверка за 10 минут
 
-**RU Digital Market Interoperability Profile**
+Требуются Python 3.10+ и Node.js 20+.
 
-Короткое позиционирование:
-
-**RU-DMIP**
-
-Историческое рабочее название:
-
-**RU Digital Asset Exchange API Standard / RU-DAX Interoperability Profile**
-
-Reference implementation:
-
-**SpreadX SDK**
-
-Так разделяются три вещи: профиль совместимости рынка, прежнее биржевое ядро и конкретная reference-библиотека.
-
-## Область Покрытия
-
-Профиль не ограничивается spot API. Он проектируется с запасом на полный жизненный цикл биржевой и брокерской инфраструктуры:
-
-- spot trading;
-- margin trading;
-- perpetual futures;
-- dated futures;
-- options;
-- swaps и другие деривативы;
-- ЦФА, гибридные цифровые права и foreign digital rights как law-aware extensions;
-- правомочия (`entitlements`), требования, полномочия, ограничения, обременения и evidence references через профиль правомочий и авторизации;
-- сильная аутентификация, authorization policy, delegated authority, step-up и audit trail для чувствительных действий;
-- цифровой рубль и открытые API как отдельные интеграционные контуры;
-- единая модель ордеров, сделок, балансов, комиссий, лимитов и ошибок;
-- universal execution semantics: intent, legs, state machine, event stream, replay, synthetic position, risk constraints;
-- wallet, deposits, withdrawals, address book, travel rule metadata;
-- custody, subaccounts, internal transfers, audit trail;
-- market data через REST и WebSocket;
-- private events через WebSocket;
-- FIX-compatible profile для профессиональных участников;
-- sandbox/testnet;
-- conformance tests;
-- reference mock venue;
-- profile discovery через `/v1/profile`;
-- L5 Compliance, Entitlements & Authorization: consent, AML/KYC boundary, audit events, regulatory reports, правомочия (`entitlements`), authentication, authorization, currency-control references.
-
-## Принципы
-
-1. Простота интеграции важнее внутренней сложности площадки.
-2. Один инструментальный словарь должен покрывать spot, futures, options, swaps и новые продукты.
-3. Ошибки, комиссии, лимиты и статусы должны быть машинно читаемыми.
-4. Sandbox должен повторять production-контракт.
-5. Совместимость доказывается тестами, а не декларацией.
-6. SDK помогает внедрять профиль, но не становится обязательной монополией.
-7. Любое нормативное использование требует правовой экспертизы и отраслевого пилота.
-8. Техническая возможность в API не должна выглядеть как правовое разрешение.
-9. Чувствительные действия с правомочиями (`entitlements`) должны быть deny-by-default и требовать сильной аутентификации, полномочий, ограничений и аудита.
-
-## Быстрый Старт
-
-Терминал 1: mock venue.
+Терминал 1:
 
 ```powershell
 cd mock-exchange
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install .
-uvicorn spreadx_mock.app:app --reload --port 8080
+uvicorn ru_dmip_mock.app:app --port 8080
 ```
 
-Терминал 2: conformance tests.
+Терминал 2:
 
 ```powershell
 cd tests/conformance
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install .
-pytest --base-url http://127.0.0.1:8080 --api-key sandbox-key
+pytest --base-url http://127.0.0.1:8080 --api-key sandbox-key --api-secret sandbox-secret
 ```
 
-Python SDK:
+Для ручной проверки импортируйте
+[`postman/RU-DMIP.postman_collection.json`](postman/RU-DMIP.postman_collection.json).
+
+Python:
 
 ```python
-from spreadx import Client
+from ru_dmip import Client
 
-client = Client("http://127.0.0.1:8080", api_key="sandbox-key", api_secret="sandbox-secret")
-print(client.time())
+client = Client(
+    "http://127.0.0.1:8080",
+    api_key="sandbox-key",
+    api_secret="sandbox-secret",
+)
+
 print(client.profile())
 print(client.execution_capabilities())
 print(client.entitlement_capabilities())
-print(client.instruments())
-print(client.balances())
 ```
 
-TypeScript SDK:
+TypeScript:
 
 ```ts
-import { SpreadXClient } from "@spreadx/sdk";
+import { RuDmipClient } from "@ru-dmip/sdk";
 
-const client = new SpreadXClient({
+const client = new RuDmipClient({
   baseUrl: "http://127.0.0.1:8080",
   apiKey: "sandbox-key",
   apiSecret: "sandbox-secret",
 });
 
-console.log(await client.time());
 console.log(await client.profile());
 console.log(await client.executionCapabilities());
-console.log(await client.entitlementCapabilities());
-console.log(await client.instruments());
 ```
 
-Windows note: если репозиторий лежит в пути с кириллицей, используйте обычный `pip install .`, а не editable install `pip install -e .`. Это снижает риск проблем с `.pth` файлами в некоторых настройках Windows/Python.
+## Как оценить для пилота
 
-## Уровни Совместимости
+Не нужно принимать весь профиль целиком. Достаточно выбрать один сквозной сценарий, сопоставить его с действующей моделью участника и зафиксировать:
 
-| Уровень | Название | Проверяемая область |
-| --- | --- | --- |
-| L0 | Discovery | `/v1/profile`, `/v1/time`, `/v1/instruments`, стандартные ошибки |
-| L1 | Market Data | order book, trades, candles, WebSocket market streams |
-| L2 | Trading & Execution | ордера, сделки, комиссии, лимиты, idempotency, execution semantics |
-| L3 | Wallet & Custody | депозиты, выводы, адреса, transfers, subaccounts |
-| L4 | Derivatives & FIX | positions, margin, funding, settlement, FIX-compatible profile |
-| L5 | Compliance, Entitlements & Authorization | `/v1/compliance/*`, `/v1/reports/*`, `/v1/entitlements/*`, consent, AML/KYC boundary, audit events, regulatory reports, правомочия (`entitlements`), authentication, authorization |
+1. какие сущности и статусы уже совпадают;
+2. где контракт неоднозначен или избыточен;
+3. какие проверки можно автоматизировать;
+4. что должно остаться внутри реализации;
+5. дает ли общий контракт экономию при следующем подключении.
 
-## Правовая И Рыночная Линия
+Готовый формат сессии, сценарии и критерии результата описаны в
+[`docs/PILOT.ru.md`](docs/PILOT.ru.md).
 
-Сильная формула не в том, чтобы просить монополию для библиотеки. Сильная формула в том, чтобы предложить открытую совместимость:
+## Принципы
 
-| Цель | Реалистичность | Эффект |
-| --- | --- | --- |
-| Принцип единого открытого API в публичной политике | Средняя | Высокий |
-| Технические требования в акте регулятора | Средняя/высокая | Очень высокий |
-| SDK как open-source reference implementation | Высокая | Максимальный вход на рынок |
+1. **Capabilities before assumptions.** Клиент сначала узнает возможности реализации.
+2. **Stable semantics.** Статусы и события имеют одинаковый смысл у разных участников.
+3. **Secure by default.** Приватные действия подписываются, ограничиваются scopes и журналируются.
+4. **Law-aware, not law-substituting.** API показывает правовые границы, но не создает разрешение на деятельность.
+5. **Data minimization.** В обычных ответах используются ссылки, хеши и статусы вместо лишних документов и персональных данных.
+6. **Testable compatibility.** Заявленный уровень подтверждается conformance report.
+7. **Incremental adoption.** Участник внедряет только нужные роли и уровни.
 
-Практический путь:
+## Структура репозитория
 
-1. Подготовить нейтральный draft и reference implementation.
-2. Провести техническое обсуждение с биржами, брокерами, банками и разработчиками.
-3. Провести юридическую и security-экспертизу.
-4. Запустить пилот с conformance report.
-5. Только после этого предлагать регуляторную формулировку.
+| Раздел | Содержание |
+| --- | --- |
+| [`docs/`](docs/) | обзор, позиционирование, пилот, безопасность, правовая рамка и roadmap |
+| [`spec/`](spec/) | нормативная техническая семантика профиля |
+| [`schemas/`](schemas/) | OpenAPI и JSON Schema |
+| [`mock-exchange/`](mock-exchange/) | reference sandbox |
+| [`tests/conformance/`](tests/conformance/) | исполняемые проверки совместимости |
+| [`sdks/`](sdks/) | Python и TypeScript reference clients |
+| [`postman/`](postman/) | коллекция для ручного исследования API |
 
-## Кому Это Может Быть Полезно
+Исторические материалы обращений находятся в `submissions/`; они не являются частью технического контракта и не подтверждают поддержку проекта адресатами.
 
-- биржам и брокерам;
-- банкам и финтех-компаниям;
-- custodians и wallet-провайдерам;
-- market makers;
-- разработчикам торгового, учетного и риск-менеджмент ПО;
-- отраслевым ассоциациям;
-- регуляторным и аналитическим командам;
-- ОИС ЦФА и ООЦФА;
-- операторам цифрового рубля, платежной и open API-инфраструктуры;
-- compliance, RegTech и audit-командам.
+## Документы для разных задач
 
-## Статус
+- [Технический стандарт](docs/STANDARD.ru.md)
+- [Краткое позиционирование](docs/POSITIONING.ru.md)
+- [White paper](docs/WHITEPAPER.ru.md)
+- [Пилот и критерии оценки](docs/PILOT.ru.md)
+- [Профили участников](docs/PARTICIPANT_PROFILES.ru.md)
+- [Безопасность](docs/SECURITY.md)
+- [Правовая рамка РФ](docs/RU_LEGAL_ALIGNMENT.ru.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Governance](docs/GOVERNANCE.md)
 
-Статус репозитория: **Draft 0.5**.
+## Участие
 
-Это рабочий технический draft. До промышленного или нормативного использования нужны независимая правовая экспертиза, security review, отраслевое обсуждение и пилот с несколькими участниками рынка. Для правовой рамки РФ см. `docs/RU_LEGAL_ALIGNMENT.ru.md`, для карты участников рынка - `docs/PARTICIPANT_PROFILES.ru.md`.
+Замечание полезно, если оно содержит конкретный сценарий, несовместимость или риск. Для изменения контракта укажите problem statement, предлагаемые поля или поведение, влияние на обратную совместимость, безопасность, правовую границу и conformance tests. Подробности — в [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Лицензия
 
-Apache-2.0. Спецификации, SDK, mock venue и тесты можно использовать, проверять, дорабатывать и внедрять в коммерческих и исследовательских проектах при соблюдении условий лицензии.
+Apache-2.0. Спецификации, схемы, reference implementations и тесты можно проверять, расширять и использовать при соблюдении условий лицензии.

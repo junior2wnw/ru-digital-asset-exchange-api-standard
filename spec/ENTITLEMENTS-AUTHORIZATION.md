@@ -112,7 +112,7 @@ For HMAC-style private REST requests, the default signing string is:
 timestamp + method + path + canonical_query + sha256(body)
 ```
 
-`canonical_query` is the sorted URL query string. The signature is HMAC-SHA256 over that string with the API secret. Production implementations SHOULD pair this with timestamp-window checks, nonce or replay cache, key rotation, scoped keys, and secure key storage.
+`canonical_query` preserves every query pair, including duplicates. Names and values are UTF-8 percent-encoded according to RFC 3986, spaces are encoded as `%20`, and encoded pairs are sorted bytewise by name and value before joining with `&`. `sha256(body)` uses the exact transmitted body bytes. The signature is HMAC-SHA256 over the signing string with the API secret. Production implementations MUST pair this with timestamp-window checks, nonce or replay cache, scoped keys, key rotation, and secure key storage.
 
 ## Authorization
 

@@ -1,4 +1,4 @@
-import { SpreadXApiError } from "./errors.js";
+import { RuDmipApiError } from "./errors.js";
 import type {
   AuditEvent,
   Balance,
@@ -10,19 +10,19 @@ import type {
   ExecutionCapabilityManifest,
   Instrument,
   Order,
+  ParticipantProfile,
   Position,
   RegulatoryReport,
   Entitlement,
   EntitlementCapabilityManifest,
   Trade,
-  VenueProfile,
   WalletAsset,
   WalletTransaction,
 } from "./types.js";
 
 type JsonObject = Record<string, unknown>;
 
-export interface SpreadXClientOptions {
+export interface RuDmipClientOptions {
   baseUrl: string;
   apiKey?: string;
   apiSecret?: string;
@@ -30,14 +30,14 @@ export interface SpreadXClientOptions {
   secureHeaders?: () => Record<string, string> | Promise<Record<string, string>>;
 }
 
-export class SpreadXClient {
+export class RuDmipClient {
   private readonly baseUrl: string;
   private readonly apiKey?: string;
   private readonly apiSecret?: string;
   private readonly fetchImpl: typeof fetch;
   private readonly secureHeaders?: () => Record<string, string> | Promise<Record<string, string>>;
 
-  constructor(options: SpreadXClientOptions) {
+  constructor(options: RuDmipClientOptions) {
     this.baseUrl = options.baseUrl.replace(/\/$/, "");
     this.apiKey = options.apiKey;
     this.apiSecret = options.apiSecret;
@@ -49,7 +49,7 @@ export class SpreadXClient {
     return this.request("GET", "/v1/time");
   }
 
-  profile(): Promise<VenueProfile> {
+  profile(): Promise<ParticipantProfile> {
     return this.request("GET", "/v1/profile");
   }
 
@@ -124,14 +124,14 @@ export class SpreadXClient {
     return this.request("POST", "/v1/orders", {
       private: true,
       body: order,
-      idempotencyKey,
+      idempotencyKey: idempotencyKey ?? randomIdempotencyKey(),
     });
   }
 
   cancelOrder(orderId: string, idempotencyKey?: string): Promise<Order> {
     return this.request("DELETE", `/v1/orders/${encodeURIComponent(orderId)}`, {
       private: true,
-      idempotencyKey,
+      idempotencyKey: idempotencyKey ?? randomIdempotencyKey(),
     });
   }
 
@@ -152,7 +152,7 @@ export class SpreadXClient {
     return this.request("POST", "/v1/wallet/deposit-addresses", {
       private: true,
       body: { asset_id: assetId, network_id: networkId },
-      idempotencyKey,
+      idempotencyKey: idempotencyKey ?? randomIdempotencyKey(),
     });
   }
 
@@ -170,7 +170,7 @@ export class SpreadXClient {
     return this.request("POST", "/v1/wallet/withdrawals", {
       private: true,
       body: withdrawal,
-      idempotencyKey,
+      idempotencyKey: idempotencyKey ?? randomIdempotencyKey(),
     });
   }
 
@@ -178,7 +178,7 @@ export class SpreadXClient {
     return this.request("POST", "/v1/transfers", {
       private: true,
       body: transfer,
-      idempotencyKey,
+      idempotencyKey: idempotencyKey ?? randomIdempotencyKey(),
     });
   }
 
@@ -244,7 +244,7 @@ export class SpreadXClient {
     const data = (await response.json()) as JsonObject;
     if (!response.ok) {
       const error = (data.error ?? {}) as JsonObject;
-      throw new SpreadXApiError({
+      throw new RuDmipApiError({
         code: String(error.code ?? "HTTP_ERROR"),
         message: String(error.message ?? response.statusText),
         status: response.status,
@@ -259,6 +259,15 @@ export class SpreadXClient {
 
 function canonicalJson(value: JsonObject): string {
   return JSON.stringify(sortJson(value));
+}
+
+function randomIdempotencyKey(): string {
+  const crypto = globalThis.crypto;
+  if (!crypto) {
+    throw new Error("Web Crypto API is required to generate idempotency keys");
+  }
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  return `rdm_${[...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("")}`;
 }
 
 function sortJson(value: unknown): unknown {
@@ -282,10 +291,13 @@ async function signedHeaders(
 ): Promise<Record<string, string>> {
   const timestamp = new Date().toISOString();
   const canonicalQuery = [...url.searchParams.entries()]
-    .sort(([leftKey, leftValue], [rightKey, rightValue]) => (
-      leftKey === rightKey ? leftValue.localeCompare(rightValue) : leftKey.localeCompare(rightKey)
-    ))
-    .map(([key, value]) => new URLSearchParams([[key, value]]).toString())
+    .map(([key, value]) => [rfc3986Encode(key), rfc3986Encode(value)] as const)
+    .sort(([leftKey, leftValue], [rightKey, rightValue]) => {
+      if (leftKey !== rightKey) return leftKey < rightKey ? -1 : 1;
+      if (leftValue === rightValue) return 0;
+      return leftValue < rightValue ? -1 : 1;
+    })
+    .map(([key, value]) => `${key}=${value}`)
     .join("&");
   const bodyHash = await sha256Hex(body);
   const payload = `${timestamp}${method.toUpperCase()}${path}${canonicalQuery}${bodyHash}`;
@@ -293,6 +305,13 @@ async function signedHeaders(
     "X-Timestamp": timestamp,
     "X-Signature": await hmacSha256Hex(apiSecret, payload),
   };
+}
+
+function rfc3986Encode(value: string): string {
+  return encodeURIComponent(value).replace(
+    /[!'()*]/g,
+    (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+  );
 }
 
 async function sha256Hex(input: string): Promise<string> {

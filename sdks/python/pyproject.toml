@@ -3,7 +3,7 @@ requires = ["hatchling>=1.25"]
 build-backend = "hatchling.build"
 
 [project]
-name = "spreadx"
+name = "ru-dmip-sdk"
 version = "0.5.0"
 description = "Python reference client for the RU Digital Market Interoperability Profile draft."
 readme = "README.md"
@@ -21,4 +21,4 @@ Homepage = "https://github.com/junior2wnw/ru-digital-asset-exchange-api-standard
 Specification = "https://github.com/junior2wnw/ru-digital-asset-exchange-api-standard/tree/main/spec"
 
 [tool.hatch.build.targets.wheel]
-packages = ["spreadx"]
+packages = ["ru_dmip"]

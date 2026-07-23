@@ -1,20 +1,17 @@
-# SpreadX TypeScript SDK
+# RU-DMIP TypeScript Reference Client
 
-Reference TypeScript SDK for the RU Digital Market Interoperability Profile draft.
+Клиент на native `fetch`, напрямую отражающий REST-контракт профиля.
 
 ```ts
-import { SpreadXClient } from "@spreadx/sdk";
+import { RuDmipClient } from "@ru-dmip/sdk";
 
-const client = new SpreadXClient({
+const client = new RuDmipClient({
   baseUrl: "http://127.0.0.1:8080",
   apiKey: "sandbox-key",
   apiSecret: "sandbox-secret",
 });
 
-console.log(await client.time());
 console.log(await client.profile());
-console.log(await client.complianceProfile());
-console.log(await client.instruments());
+console.log(await client.executionCapabilities());
+console.log(await client.entitlementCapabilities());
 ```
-
-The SDK is intentionally tiny and readable. It uses the native `fetch` API and mirrors the REST profile directly.

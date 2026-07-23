@@ -8,7 +8,7 @@ All timestamps use RFC 3339 UTC. All decimal values use strings.
 
 | Method | Path | Description |
 | --- | --- | --- |
-| `GET` | `/v1/profile` | Venue roles, compatibility levels, capabilities, and legal profiles |
+| `GET` | `/v1/profile` | Participant roles, compatibility levels, capabilities, and legal profiles |
 | `GET` | `/v1/time` | Server time |
 | `GET` | `/v1/instruments` | List instruments |
 | `GET` | `/v1/instruments/{instrument_id}` | Instrument details |
@@ -43,7 +43,7 @@ All timestamps use RFC 3339 UTC. All decimal values use strings.
 | `GET` | `/v1/entitlements` | Entitlements visible to the authenticated subject |
 | `POST` | `/v1/entitlements/authorization/evaluate` | Evaluate an entitlement authorization decision without executing the action |
 
-## Venue Profile
+## Participant Profile
 
 `GET /v1/profile` is the machine-readable entry point for every market participant.
 
@@ -57,7 +57,7 @@ It MUST return:
 - `legal_profiles` that explain applicable law-aware boundaries;
 - `data_governance` for consent, personal data, retention, and audit trail responsibility.
 
-The profile does not grant legal permission. It only declares the technical and operational contract a venue is willing to expose.
+The profile does not grant legal permission. It only declares the technical and operational contract an implementation exposes.
 
 ## Universal Execution Capabilities
 
@@ -90,7 +90,7 @@ This endpoint MUST NOT expose adapter internals, venue-specific endpoint names, 
 
 Entitlement endpoints MUST be deny-by-default. Sensitive actions such as transfer, encumbrance, redemption, delegation, and evidence reads SHOULD require request signing, timestamp/nonce replay protection, scoped authorization, high authentication assurance, step-up, audit trail, and dual control where appropriate.
 
-The reference HMAC signing string is `timestamp + method + path + canonical_query + sha256(body)`. Production implementations SHOULD validate the signature, timestamp window, nonce or replay cache, key scope, and assurance level before evaluating the entitlement action.
+The reference HMAC signing string is `timestamp + method + path + canonical_query + sha256(body)`. Production implementations MUST validate the signature, timestamp window, nonce or replay cache, key scope, and assurance level before evaluating the entitlement action.
 
 `GET /v1/entitlements` MUST NOT return raw identity documents, direct personal identifiers, unmasked protected data, or protected legal documents. It SHOULD return stable references, hashes, registry references, and protected download references.
 
@@ -126,6 +126,18 @@ Private requests:
 - `X-Nonce` or equivalent replay-protection field for high-risk entitlement actions;
 - `X-Idempotency-Key` for commands;
 - `X-Request-ID`, optional.
+
+## Request Signing
+
+The reference HMAC signing string for private requests is:
+
+```text
+timestamp + method + path + canonical_query + sha256(body)
+```
+
+`canonical_query` MUST contain every query pair, including duplicates. Names and values are UTF-8 percent-encoded according to RFC 3986, with spaces encoded as `%20`; encoded pairs are then sorted bytewise by name and value and joined with `&`. `sha256(body)` is calculated over the exact transmitted body bytes. The signature is HMAC-SHA256 with the API secret.
+
+Production implementations MAY publish another signing profile through capabilities, but MUST define one unambiguous canonical form and apply timestamp-window, replay-protection, key-scope, rotation, and secure-storage controls.
 
 ## Pagination
 
@@ -168,9 +180,9 @@ The following operations MUST support `X-Idempotency-Key`:
 
 - create order;
 - cancel order;
+- create deposit address;
 - create withdrawal;
 - create transfer;
-- create deposit address, if address creation is asynchronous.
 
 ## Rate Limits
 

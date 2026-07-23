@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:ru-dax:schema:trade:0.1",
+  "$id": "urn:ru-dmip:schema:trade:0.1",
   "title": "Trade",
   "type": "object",
   "required": [

@@ -1,5 +1,6 @@
-export { SpreadXClient } from "./client.js";
-export { SpreadXApiError } from "./errors.js";
+export { RuDmipClient } from "./client.js";
+export type { RuDmipClientOptions } from "./client.js";
+export { RuDmipApiError } from "./errors.js";
 export type {
   AuditEvent,
   AuthenticationAssurance,
@@ -21,6 +22,7 @@ export type {
   ExecutionState,
   Instrument,
   Order,
+  ParticipantProfile,
   Position,
   PriceLevel,
   RegulatoryReport,
@@ -34,7 +36,6 @@ export type {
   EntitlementType,
   SecurityControl,
   Trade,
-  VenueProfile,
   WalletAsset,
   WalletTransaction,
 } from "./types.js";

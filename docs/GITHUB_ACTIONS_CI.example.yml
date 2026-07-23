@@ -27,14 +27,19 @@ jobs:
           PY
       - name: Typecheck TypeScript SDK
         working-directory: sdks/typescript
-        run: npm install && npm run typecheck
+        run: npm ci && npm run typecheck
       - name: Install Python SDKs and conformance tests
         run: |
           python -m pip install -U pip
           python -m pip install ./sdks/python ./mock-exchange ./tests/conformance
-      - name: Start mock venue
-        run: |
-          uvicorn spreadx_mock.app:app --host 127.0.0.1 --port 8080 &
-          sleep 3
       - name: Run conformance tests
-        run: pytest tests/conformance --base-url http://127.0.0.1:8080 --api-key sandbox-key
+        run: |
+          uvicorn ru_dmip_mock.app:app --host 127.0.0.1 --port 8080 &
+          sandbox_pid=$!
+          trap 'kill "$sandbox_pid"' EXIT
+          for attempt in {1..30}; do
+            curl --fail --silent http://127.0.0.1:8080/v1/time >/dev/null && break
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8080/v1/time >/dev/null
+          pytest tests/conformance --base-url http://127.0.0.1:8080 --api-key sandbox-key --api-secret sandbox-secret

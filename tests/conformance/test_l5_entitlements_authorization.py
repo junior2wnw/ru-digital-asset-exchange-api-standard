@@ -4,7 +4,7 @@ import hashlib
 import hmac
 import json
 from datetime import datetime, timezone
-from urllib.parse import urlencode
+from urllib.parse import quote
 
 import httpx
 
@@ -19,16 +19,21 @@ def signed_entitlement_headers(
     *,
     body: str = "",
     query: dict[str, object] | None = None,
+    timestamp: str | None = None,
 ) -> dict[str, str]:
-    timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-    canonical_query = urlencode(sorted((query or {}).items()))
+    request_timestamp = timestamp or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    encoded_query = [
+        (quote(str(key), safe="~-._"), quote(str(value), safe="~-._"))
+        for key, value in (query or {}).items()
+    ]
+    canonical_query = "&".join(f"{key}={value}" for key, value in sorted(encoded_query))
     body_hash = hashlib.sha256(body.encode()).hexdigest()
-    payload = f"{timestamp}{method.upper()}{path}{canonical_query}{body_hash}"
+    payload = f"{request_timestamp}{method.upper()}{path}{canonical_query}{body_hash}"
     signature = hmac.new(SANDBOX_API_SECRET.encode(), payload.encode(), hashlib.sha256).hexdigest()
     return {
         **auth_headers,
         "X-Signature": signature,
-        "X-Timestamp": timestamp,
+        "X-Timestamp": request_timestamp,
     }
 
 
@@ -50,14 +55,28 @@ def test_l5_entitlement_capabilities_are_secure_by_default(client: httpx.Client)
     assert payload["audit_required"] is True
 
 
-def test_l5_entitlements_require_signed_private_access(client: httpx.Client, auth_headers: dict[str, str]) -> None:
-    missing_signature = client.get("/v1/entitlements", headers=auth_headers)
+def test_l5_entitlements_require_signed_private_access(
+    client: httpx.Client,
+    unsigned_client: httpx.Client,
+    auth_headers: dict[str, str],
+) -> None:
+    missing_signature = unsigned_client.get("/v1/entitlements", headers=auth_headers)
     assert missing_signature.status_code == 401
 
     invalid_headers = signed_entitlement_headers(auth_headers, "GET", "/v1/entitlements")
     invalid_headers["X-Signature"] = "invalid-signature"
-    invalid_signature = client.get("/v1/entitlements", headers=invalid_headers)
+    invalid_signature = unsigned_client.get("/v1/entitlements", headers=invalid_headers)
     assert invalid_signature.status_code == 401
+
+    stale_headers = signed_entitlement_headers(
+        auth_headers,
+        "GET",
+        "/v1/entitlements",
+        timestamp="2026-01-01T00:00:00Z",
+    )
+    stale_signature = unsigned_client.get("/v1/entitlements", headers=stale_headers)
+    assert stale_signature.status_code == 401
+    assert stale_signature.json()["error"]["code"] == "SIGNATURE_EXPIRED"
 
     response = client.get(
         "/v1/entitlements",
@@ -72,6 +91,18 @@ def test_l5_entitlements_require_signed_private_access(client: httpx.Client, aut
     assert "full_name" not in entitlement
     assert "passport_number" not in entitlement
     assert entitlement["extensions"]["raw_documents_included"] is False
+
+
+def test_l5_replayed_signature_is_rejected(
+    unsigned_client: httpx.Client,
+    auth_headers: dict[str, str],
+) -> None:
+    signed_headers = signed_entitlement_headers(auth_headers, "GET", "/v1/entitlements")
+    first = unsigned_client.get("/v1/entitlements", headers=signed_headers)
+    replay = unsigned_client.get("/v1/entitlements", headers=signed_headers)
+    assert first.status_code == 200
+    assert replay.status_code == 401
+    assert replay.json()["error"]["code"] == "REPLAY_DETECTED"
 
 
 def test_l5_entitlement_authorization_denies_low_assurance_transfer(client: httpx.Client, auth_headers: dict[str, str]) -> None:

@@ -1,99 +1,78 @@
 # Roadmap
 
-## 0.5 Entitlements & Authorization
+Roadmap описывает проверяемые результаты, а не календарные обещания. Версия переходит в следующий статус только после появления соответствующих схем, reference behavior и conformance evidence.
 
-- Add `/v1/entitlements/capabilities`.
-- Add private entitlement endpoints for entitlements and authorization decision evaluation.
-- Add entitlements, claims, evidence, authentication assurance, authorization policy, delegated authority, step-up, dual control, and prohibited-entitlement policy.
-- Add JSON Schema, OpenAPI, SDK, mock venue, Postman, and conformance coverage.
-- Keep legal validity, registry status, platform rules, contracts, and protected documents outside ordinary API responses.
+## Current: Draft 0.5
 
-## 0.4 Universal Execution Semantics
+Реализовано:
 
-- Add `/v1/execution/capabilities`.
-- Add universal execution semantics spec for intents, legs, state machine, events, replay, synthetic positions, risk constraints, and market-data quality.
-- Add JSON Schema, OpenAPI, SDK, mock venue, and conformance coverage.
-- Keep connector, adapter, and venue-specific logic explicitly outside the standard.
+- discovery profile для ролей, capabilities и legal/data-governance boundaries;
+- REST market data, trading, wallet и reference endpoints;
+- universal execution semantics;
+- compliance and reporting profile;
+- entitlements and authorization profile;
+- OpenAPI и JSON Schema;
+- Python и TypeScript reference clients;
+- reference sandbox и Postman collection;
+- conformance suite уровней L0-L5;
+- компактный pilot protocol со сценариями и критериями результата;
+- российская law-aware рамка.
 
-## 0.3 L5 Compliance & Reporting
+Текущие ограничения:
 
-- Reframe the public project name as RU Digital Market Interoperability Profile, with RU-DAX as the exchange/trading core.
-- Add L5 Compliance & Reporting profile.
-- Add private L5 endpoints for compliance profile, consent records, audit events, and regulatory report descriptors.
-- Add JSON Schema, OpenAPI, SDK, mock venue, Postman, and conformance coverage for L5.
-- Add data-minimization and legal-boundary language for consent, AML/KYC, audit, regulatory reporting, and currency-control references.
+- WebSocket и FIX в основном описаны спецификацией, но покрыты тестами не полностью;
+- нет второй независимой реализации;
+- нет публичного формата подписанного conformance report;
+- не проведены независимые legal и security review;
+- нет подтвержденного отраслевого pilot report.
 
-## 0.2 Universal Market Profile
+## 0.6 Pilot Ready
 
-- Add `/v1/profile` for participant roles, capabilities, legal profiles, and data governance.
-- Add participant-role model for exchanges, brokers, banks, OIS CFA, OOTSFA, custody, wallets, market makers, issuers, compliance, analytics, and developer tools.
-- Add Russian law-aware alignment document.
-- Add optional law-aware instrument fields: legal classification, regulatory scope, investor access, payment-use flag, and jurisdiction.
-- Add L5 Compliance & Reporting target level.
+- Добавить reusable gap-report template к опубликованному pilot protocol.
+- Добавить один внешний fixture или adapter example.
+- Сформировать machine-readable conformance report.
+- Добавить negative-path tests для подписи, replay, scope и protected-data leakage.
+- Автоматизировать полный verify flow в CI.
+- Проверить один сквозной сценарий с внешним участником на синтетических данных.
 
-## 0.1 Draft
+## 0.7 Event Completeness
 
-- Опубликовать white paper.
-- Опубликовать модульную спецификацию.
-- Добавить OpenAPI draft.
-- Добавить JSON Schema draft.
-- Добавить Python SDK skeleton.
-- Добавить TypeScript SDK skeleton.
-- Добавить mock venue.
-- Добавить conformance tests.
+- Завершить WebSocket snapshot/delta profile.
+- Добавить sequence, replay и gap-recovery tests.
+- Нормализовать private events для order, trade, wallet и authorization lifecycles.
+- Проверить cancel/fill race и out-of-order delivery.
+- Добавить operational status and incident feed.
 
-## 0.6 Market Data
+## 0.8 Role Profiles
 
-- REST order book, trades, candles, tickers.
-- WebSocket snapshots and deltas.
-- Replay and sequence model.
-- Market data conformance tests.
+- Уточнить профили для банков, брокеров, организаторов торгов, ОИС/операторов обмена, цифровых депозитариев, custodians и analytics providers.
+- Добавить role-specific capability requirements.
+- Связать reporting descriptors с ролью и правовым контуром.
+- Добавить migration guidance для существующих API.
 
-## 0.7 Trading
+## 0.9 Independent Implementation
 
-- Unified order lifecycle.
-- Idempotency and retry guidance.
-- Fees and limits endpoints.
-- Trading conformance tests.
-
-## 0.8 Wallet & Custody
-
-- Deposit addresses.
-- Deposit and withdrawal lifecycle.
-- Internal transfers.
-- Subaccounts.
-- Travel rule metadata profile.
-- Wallet conformance tests.
-
-## 0.9 Derivatives
-
-- Perpetual futures.
-- Dated futures.
-- Options.
-- Margin modes.
-- Funding, settlement, liquidation data.
-- Derivatives conformance tests.
-
-## 0.10 Institutional
-
-- FIX-compatible profile.
-- Certification checklist.
-- Operational monitoring.
-- Security review checklist.
-- Pilot package for regulators and industry associations.
-
-## 0.11 Advanced Compliance & Reporting
-
-- Role-specific reporting profiles for banks, OIS CFA, OOTSFA, custodians, brokers, and analytics providers.
-- JSON Schema validation for L5 report descriptors.
-- Negative-path tests for protected-data leakage.
-- Optional report export job lifecycle.
-- Tax/reporting hooks for supported roles.
+- Подключить вторую независимую implementation.
+- Измерить повторное использование клиентской логики.
+- Опубликовать обезличенный gap report.
+- Зафиксировать обязательные и необязательные extensions.
+- Провести независимый security review.
+- Провести профильную legal review.
 
 ## 1.0 Candidate
 
-- At least two independent implementations.
-- Public conformance reports.
-- Legal review.
-- Security review.
-- Regulator-ready specification package.
+- Не менее двух независимых implementations.
+- Воспроизводимые conformance reports.
+- Стабильная governance procedure.
+- Политика совместимости и deprecation.
+- Security review report.
+- Legal boundary review.
+- Pilot evidence для минимум двух разных ролей.
+
+## После 1.0
+
+- дополнительные transport bindings;
+- расширенные institutional/FIX профили;
+- новые asset and entitlement types через proposal process;
+- подписанные conformance attestations;
+- tooling для сравнения capabilities и migration gaps.

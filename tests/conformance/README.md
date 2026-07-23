@@ -1,16 +1,16 @@
 # Conformance Tests
 
-The conformance suite checks that a venue behaves like the RU Digital Market Interoperability Profile draft.
+The conformance suite checks an API implementation against the claimed RU Digital Market Interoperability Profile level.
 
-Run against the local mock venue:
+Run against the local reference sandbox:
 
 ```powershell
-pytest --base-url http://127.0.0.1:8080 --api-key sandbox-key
+pytest --base-url http://127.0.0.1:8080 --api-key sandbox-key --api-secret sandbox-secret
 ```
 
 Levels:
 
-- L0: discovery, venue profile, and standard errors.
+- L0: discovery, participant profile, and standard errors.
 - L1: market data.
 - L2: trading and universal execution semantics.
 - L3: wallet and custody.

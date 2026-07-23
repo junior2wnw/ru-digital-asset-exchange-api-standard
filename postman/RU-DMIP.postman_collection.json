@@ -37,12 +37,13 @@
           "const method = pm.request.method.toUpperCase();",
           "const pathParts = Array.isArray(pm.request.url.path) ? pm.request.url.path : String(pm.request.url.path || \"\").split(\"/\");",
           "const path = \"/\" + pathParts.map(part => pm.variables.replaceIn(part)).join(\"/\");",
-          "const query = pm.request.url.query ? pm.request.url.query.all().filter(item => !item.disabled).map(item => [pm.variables.replaceIn(item.key), pm.variables.replaceIn(item.value || \"\")]).sort((a, b) => a[0] === b[0] ? a[1].localeCompare(b[1]) : a[0].localeCompare(b[0])).map(item => encodeURIComponent(item[0]) + \"=\" + encodeURIComponent(item[1])).join(\"&\") : \"\";",
+          "const rfc3986 = value => encodeURIComponent(value).replace(/[!'()*]/g, character => \"%\" + character.charCodeAt(0).toString(16).toUpperCase());",
+          "const query = pm.request.url.query ? pm.request.url.query.all().filter(item => !item.disabled).map(item => [rfc3986(pm.variables.replaceIn(item.key)), rfc3986(pm.variables.replaceIn(item.value || \"\"))]).sort((a, b) => a[0] === b[0] ? (a[1] === b[1] ? 0 : a[1] < b[1] ? -1 : 1) : a[0] < b[0] ? -1 : 1).map(item => item[0] + \"=\" + item[1]).join(\"&\") : \"\";",
           "const body = pm.request.body && pm.request.body.mode === \"raw\" ? pm.variables.replaceIn(pm.request.body.raw || \"\") : \"\";",
           "const bodyHash = CryptoJS.SHA256(body).toString(CryptoJS.enc.Hex);",
           "const payload = timestamp + method + path + query + bodyHash;",
           "const signature = CryptoJS.HmacSHA256(payload, secret).toString(CryptoJS.enc.Hex);",
-          "if (path.startsWith(\"/v1/entitlements\")) {",
+          "if (pm.request.headers.has(\"X-API-Key\")) {",
           "  pm.request.headers.upsert({ key: \"X-Timestamp\", value: timestamp });",
           "  pm.request.headers.upsert({ key: \"X-Signature\", value: signature });",
           "}"
@@ -62,7 +63,7 @@
           }
         },
         {
-          "name": "Venue Profile",
+          "name": "Participant Profile",
           "request": {
             "method": "GET",
             "url": "{{baseUrl}}/v1/profile"
