@@ -128,6 +128,8 @@
         "registry_ref": { "type": "string" },
         "legal_classification": { "type": "string" },
         "governing_framework": { "type": "string" },
+        "legal_basis": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
         "quantity": { "type": "string" },
         "unit": { "type": "string" },
         "restrictions": {
@@ -147,6 +149,19 @@
         "updated_at": { "type": "string", "format": "date-time" },
         "extensions": { "type": "object", "additionalProperties": true }
       },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "entitlement_type": { "const": "other_lawful_right" }
+            },
+            "required": ["entitlement_type"]
+          },
+          "then": {
+            "required": ["legal_basis", "description"]
+          }
+        }
+      ],
       "additionalProperties": false
     },
     "AuthorizationDecisionRequest": {

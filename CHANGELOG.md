@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Rebuilt the reader-facing narrative around a plain-language definition, the recurring integration problem, role-specific outcomes, and a measurable pilot path while preserving the technical, security, and legal depth of Draft 0.5.
+- Updated the Russian legal source snapshot through 2026-07-30 with the Bank of Russia's first draft acts for organized trading and digital depositories, retaining an explicit draft-versus-effective-law boundary.
+- Made `legal_basis` and `description` mandatory in JSON Schema when `other_lawful_right` is used.
 - Reworked the public README, positioning, white paper, adoption plan, roadmap, and contribution guidance around a testable participant-neutral profile.
 - Added a compact pilot protocol with shared scenarios, success criteria, data boundaries, and participant-controlled publicity.
 - Added participant roles and sandbox discovery for the developing 2026 Russian cryptocurrency-circulation contour without implying production eligibility.

@@ -355,7 +355,7 @@ export interface EntitlementCapabilityManifest {
   extensions?: Record<string, unknown>;
 }
 
-export interface Entitlement {
+interface EntitlementBase {
   entitlement_id: string;
   entitlement_type: EntitlementType;
   status: EntitlementStatus;
@@ -368,6 +368,8 @@ export interface Entitlement {
   registry_ref?: string;
   legal_classification: string;
   governing_framework: string;
+  legal_basis?: string;
+  description?: string;
   quantity?: DecimalString;
   unit?: string;
   restrictions: Array<{
@@ -396,6 +398,16 @@ export interface Entitlement {
   updated_at: string;
   extensions?: Record<string, unknown>;
 }
+
+export type Entitlement = EntitlementBase &
+  (
+    | { entitlement_type: Exclude<EntitlementType, "other_lawful_right"> }
+    | {
+        entitlement_type: "other_lawful_right";
+        legal_basis: string;
+        description: string;
+      }
+  );
 
 export interface AuthorizationDecisionRequest {
   subject_ref: string;
